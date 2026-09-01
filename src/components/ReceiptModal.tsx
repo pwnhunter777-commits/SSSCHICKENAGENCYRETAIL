@@ -49,42 +49,53 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
     ctx.fillRect(0, 0, 2008, 827);
 
     // Subtle outer border
-    ctx.strokeStyle = '#e2e8f0';
+    ctx.strokeStyle = '#cbd5e1';
     ctx.lineWidth = 4;
-    ctx.strokeRect(10, 10, 1988, 807);
+    ctx.strokeRect(12, 12, 1984, 803);
 
     // 2. Company Name (Top Center)
-    const companyName = (settings.shopName || 'FRESH CHICKEN CENTER').toUpperCase();
+    const companyName = (settings.shopName || 'SSS CHICKEN AGENCY').toUpperCase();
     ctx.textAlign = 'center';
     ctx.textBaseline = 'top';
 
     // Main Company Header
-    ctx.fillStyle = '#0f172a';
-    ctx.font = 'bold 56px "Inter", "Segoe UI", system-ui, sans-serif';
-    ctx.fillText(companyName, 1004, 38);
+    ctx.fillStyle = '#064e3b';
+    ctx.font = '900 54px "Inter", "Segoe UI", system-ui, sans-serif';
+    ctx.fillText(companyName, 1004, 30);
 
-    // Sub-header (Address, Phone, Bill Info)
-    const subDetails: string[] = [];
-    if (settings.address) subDetails.push(settings.address);
-    if (settings.phoneNumber) subDetails.push(`Ph: ${settings.phoneNumber}`);
-    if (bill.billNumber) subDetails.push(`Bill #${bill.billNumber}`);
-    if (bill.date) subDetails.push(`${bill.date} ${bill.time || ''}`);
-    if (subDetails.length > 0) {
-      ctx.fillStyle = '#64748b';
-      ctx.font = '500 24px "Inter", system-ui, sans-serif';
-      ctx.fillText(subDetails.join('   •   '), 1004, 105);
+    // Sub-header (Address Line)
+    let currentY = 92;
+    if (settings.address) {
+      ctx.fillStyle = '#334155';
+      ctx.font = '600 22px "Inter", system-ui, sans-serif';
+      // If address is long, render cleanly
+      ctx.fillText(settings.address, 1004, currentY);
+      currentY += 30;
+    }
+
+    // Phone, GST, Bill Info Line
+    const metaParts: string[] = [];
+    if (settings.phoneNumber) metaParts.push(`Ph: ${settings.phoneNumber}`);
+    if (settings.gstNumber) metaParts.push(`GST: ${settings.gstNumber}`);
+    if (bill.billNumber) metaParts.push(`Bill #${bill.billNumber}`);
+    if (bill.date) metaParts.push(`${bill.date} ${bill.time || ''}`);
+
+    if (metaParts.length > 0) {
+      ctx.fillStyle = '#475569';
+      ctx.font = '700 20px "Inter", system-ui, sans-serif';
+      ctx.fillText(metaParts.join('   •   '), 1004, currentY);
     }
 
     // 3. Left Section: Green Rectangle ("item list")
-    // Layout coordinates: x: 60, y: 155, width: 880, height: 620
+    // Layout coordinates: x: 60, y: 175, width: 880, height: 600
     const greenX = 60;
-    const greenY = 155;
+    const greenY = 175;
     const greenWidth = 880;
-    const greenHeight = 620;
+    const greenHeight = 600;
     const radius = 24;
 
     // Draw rounded green container
-    ctx.fillStyle = '#60cf3a'; // Vibrant green
+    ctx.fillStyle = '#48bb17'; // Rich vibrant green
     ctx.beginPath();
     ctx.moveTo(greenX + radius, greenY);
     ctx.lineTo(greenX + greenWidth - radius, greenY);
@@ -105,76 +116,76 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
 
     // "item list" Header
     ctx.textAlign = 'left';
-    ctx.fillStyle = '#0f2409';
-    ctx.font = '900 46px "Inter", system-ui, sans-serif';
-    ctx.fillText(t.itemList, greenX + 40, greenY + 36);
+    ctx.fillStyle = '#0a2205';
+    ctx.font = '900 44px "Inter", system-ui, sans-serif';
+    ctx.fillText(t.itemList, greenX + 40, greenY + 30);
 
     // Table header inside green box
     ctx.fillStyle = '#143c0e';
-    ctx.font = '700 22px "Inter", system-ui, sans-serif';
-    ctx.fillText(t.itemCol, greenX + 40, greenY + 105);
+    ctx.font = '800 22px "Inter", system-ui, sans-serif';
+    ctx.fillText(t.itemCol, greenX + 40, greenY + 95);
     ctx.textAlign = 'right';
-    ctx.fillText(t.weightCol, greenX + greenWidth - 360, greenY + 105);
-    ctx.fillText(t.rateCol, greenX + greenWidth - 210, greenY + 105);
-    ctx.fillText(t.priceCol, greenX + greenWidth - 40, greenY + 105);
+    ctx.fillText(t.weightCol, greenX + greenWidth - 360, greenY + 95);
+    ctx.fillText(t.rateCol, greenX + greenWidth - 210, greenY + 95);
+    ctx.fillText(t.priceCol, greenX + greenWidth - 40, greenY + 95);
 
     // Separator line
-    ctx.strokeStyle = '#4cb826';
+    ctx.strokeStyle = '#389e0f';
     ctx.lineWidth = 3;
     ctx.beginPath();
-    ctx.moveTo(greenX + 40, greenY + 135);
-    ctx.lineTo(greenX + greenWidth - 40, greenY + 135);
+    ctx.moveTo(greenX + 40, greenY + 125);
+    ctx.lineTo(greenX + greenWidth - 40, greenY + 125);
     ctx.stroke();
 
     // Item List Rows
-    let rowY = greenY + 160;
-    const maxRows = Math.min(bill.items.length, 7);
+    let rowY = greenY + 148;
+    const maxRows = Math.min(bill.items.length, 6);
     bill.items.slice(0, maxRows).forEach((item, index) => {
-      // Row Card Background (subtle white frosted)
-      ctx.fillStyle = index % 2 === 0 ? 'rgba(255, 255, 255, 0.92)' : 'rgba(255, 255, 255, 0.78)';
-      const cardH = 54;
+      // Row Card Background
+      ctx.fillStyle = index % 2 === 0 ? 'rgba(255, 255, 255, 0.95)' : 'rgba(255, 255, 255, 0.82)';
+      const cardH = 56;
       ctx.beginPath();
       if ((ctx as any).roundRect) {
-        (ctx as any).roundRect(greenX + 30, rowY - 6, greenWidth - 60, cardH, 12);
+        (ctx as any).roundRect(greenX + 26, rowY - 4, greenWidth - 52, cardH, 12);
       } else {
-        ctx.rect(greenX + 30, rowY - 6, greenWidth - 60, cardH);
+        ctx.rect(greenX + 26, rowY - 4, greenWidth - 52, cardH);
       }
       ctx.fill();
 
       // Product Name
       ctx.textAlign = 'left';
       ctx.fillStyle = '#0f172a';
-      ctx.font = '700 24px "Inter", system-ui, sans-serif';
+      ctx.font = '800 24px "Inter", system-ui, sans-serif';
       const displayName =
         item.productName.length > 18
           ? item.productName.substring(0, 16) + '..'
           : item.productName;
-      ctx.fillText(displayName, greenX + 45, rowY + 6);
+      ctx.fillText(displayName, greenX + 42, rowY + 10);
 
       // Weight
       ctx.textAlign = 'right';
       ctx.fillStyle = '#1e293b';
       ctx.font = '700 24px "Inter", system-ui, sans-serif';
-      ctx.fillText(`${item.kg.toFixed(2)} kg`, greenX + greenWidth - 360, rowY + 6);
+      ctx.fillText(`${item.kg.toFixed(2)} kg`, greenX + greenWidth - 360, rowY + 10);
 
       // Rate
       ctx.fillStyle = '#475569';
       ctx.font = '600 22px "Inter", system-ui, sans-serif';
-      ctx.fillText(`₹${item.pricePerKg}`, greenX + greenWidth - 210, rowY + 6);
+      ctx.fillText(`₹${item.pricePerKg}`, greenX + greenWidth - 210, rowY + 10);
 
       // Price
-      ctx.fillStyle = '#0f5132';
-      ctx.font = '800 26px "Inter", system-ui, sans-serif';
-      ctx.fillText(`₹${Math.round(item.amount)}`, greenX + greenWidth - 45, rowY + 6);
+      ctx.fillStyle = '#064e3b';
+      ctx.font = '900 26px "Inter", system-ui, sans-serif';
+      ctx.fillText(`₹${Math.round(item.amount)}`, greenX + greenWidth - 42, rowY + 10);
 
-      rowY += 62;
+      rowY += 66;
     });
 
-    if (bill.items.length > 7) {
+    if (bill.items.length > 6) {
       ctx.textAlign = 'center';
       ctx.fillStyle = '#0f2409';
       ctx.font = '700 20px "Inter", system-ui, sans-serif';
-      ctx.fillText(`+ ${bill.items.length - 7} more items`, greenX + greenWidth / 2, rowY + 10);
+      ctx.fillText(`+ ${bill.items.length - 6} more item(s)`, greenX + greenWidth / 2, rowY + 10);
     }
 
     // 4. Right Section: Total Amount, KG, Price
@@ -184,43 +195,44 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
     // Top: total amount
     ctx.textAlign = 'left';
     ctx.fillStyle = '#0f172a';
-    ctx.font = '800 64px "Inter", system-ui, sans-serif';
-    ctx.fillText(t.totalAmountHeader, rightX + 60, 205);
+    ctx.font = '900 64px "Inter", system-ui, sans-serif';
+    ctx.fillText(t.totalAmountHeader, rightX + 40, 200);
 
     // Thin accent divider
     ctx.strokeStyle = '#e2e8f0';
     ctx.lineWidth = 3;
     ctx.beginPath();
-    ctx.moveTo(rightX + 60, 290);
-    ctx.lineTo(rightX + rightWidth - 60, 290);
+    ctx.moveTo(rightX + 40, 280);
+    ctx.lineTo(rightX + rightWidth - 40, 280);
     ctx.stroke();
 
     // Middle: kg : 5kg
     ctx.fillStyle = '#1e293b';
-    ctx.font = '700 60px "Inter", system-ui, sans-serif';
-    ctx.fillText(t.kgLabel, rightX + 60, 395);
+    ctx.font = '800 60px "Inter", system-ui, sans-serif';
+    ctx.fillText(t.kgLabel, rightX + 40, 390);
     ctx.fillStyle = '#0f172a';
-    ctx.font = '900 68px "Inter", system-ui, sans-serif';
-    ctx.fillText(`${bill.totalKg.toFixed(2)}kg`, rightX + 320, 395);
+    ctx.font = '900 70px "Inter", system-ui, sans-serif';
+    ctx.fillText(`${bill.totalKg.toFixed(2)}kg`, rightX + 330, 390);
 
     // Bottom: price : 1000
     ctx.fillStyle = '#1e293b';
-    ctx.font = '700 60px "Inter", system-ui, sans-serif';
-    ctx.fillText(t.priceLabel, rightX + 60, 595);
-    ctx.fillStyle = '#0f5132';
-    ctx.font = '900 78px "Inter", system-ui, sans-serif';
-    ctx.fillText(`₹ ${Math.round(bill.totalAmount)}`, rightX + 320, 595);
+    ctx.font = '800 60px "Inter", system-ui, sans-serif';
+    ctx.fillText(t.priceLabel, rightX + 40, 560);
+    ctx.fillStyle = '#064e3b';
+    ctx.font = '900 82px "Inter", system-ui, sans-serif';
+    ctx.fillText(`₹ ${Math.round(bill.totalAmount)}`, rightX + 330, 560);
 
-    // Footer info on bottom-right (UPI or Thank You)
+    // Footer info on bottom-right (UPI and Thank You)
+    ctx.textAlign = 'left';
     if (settings.upiId) {
-      ctx.fillStyle = '#64748b';
-      ctx.font = '600 24px "Inter", system-ui, sans-serif';
-      ctx.fillText(`UPI: ${settings.upiId}`, rightX + 60, 715);
+      ctx.fillStyle = '#475569';
+      ctx.font = '700 24px "Inter", system-ui, sans-serif';
+      ctx.fillText(`UPI: ${settings.upiId}`, rightX + 40, 700);
     }
     ctx.textAlign = 'right';
-    ctx.fillStyle = '#94a3b8';
-    ctx.font = 'italic 24px "Inter", system-ui, sans-serif';
-    ctx.fillText(t.thankYou, rightX + rightWidth - 60, 715);
+    ctx.fillStyle = '#64748b';
+    ctx.font = 'italic 26px "Inter", system-ui, sans-serif';
+    ctx.fillText(t.thankYou, rightX + rightWidth - 40, 700);
   }, [bill, settings, t]);
 
   useEffect(() => {
@@ -345,10 +357,10 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
         </div>
 
         {/* Modal Body */}
-        <div className="p-4 sm:p-6 overflow-y-auto bg-slate-100/70 flex-1 flex flex-col items-center justify-center">
+        <div className="p-3 sm:p-5 overflow-y-auto bg-slate-100/70 flex-1 flex flex-col items-center justify-center">
           {viewFormat === 'banner' ? (
             /* 2008 × 827 Responsive Bill Display */
-            <div className="w-full flex flex-col items-center">
+            <div className="w-full flex flex-col items-center max-w-3xl">
               <div
                 id="printable-receipt"
                 className="w-full bg-white rounded-2xl shadow-md border border-slate-200 overflow-hidden relative"
@@ -357,10 +369,10 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
                   maxWidth: '100%',
                 }}
               >
-                <div className="w-full h-full flex flex-col p-[2.5%] text-slate-900 justify-between select-none">
-                  {/* Top Company Name Header with Mascot Logo */}
-                  <div className="flex items-center justify-center gap-3 pt-[0.5%] pb-[1%] border-b border-slate-100">
-                    <div className="w-[clamp(28px,4.5vw,52px)] h-[clamp(28px,4.5vw,52px)] rounded-full bg-white border-2 border-emerald-400 overflow-hidden shrink-0 shadow-xs flex items-center justify-center">
+                <div className="w-full h-full flex flex-col p-[2%] text-slate-900 justify-between select-none">
+                  {/* Top Company Name Header */}
+                  <div className="flex items-center justify-center gap-2.5 pt-[0.2%] pb-[0.8%] border-b border-slate-100">
+                    <div className="w-[clamp(24px,3.8vw,48px)] h-[clamp(24px,3.8vw,48px)] rounded-xl bg-white border-2 border-emerald-500 overflow-hidden shrink-0 shadow-xs flex items-center justify-center">
                       <img
                         src={settings.logoUrl || '/logo.png'}
                         alt="Logo"
@@ -370,41 +382,40 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
                         }}
                       />
                     </div>
-                    <div className="text-center">
-                      <h1 className="text-[clamp(14px,3.2vw,36px)] font-black tracking-wide uppercase text-slate-900 leading-none">
-                        {settings.shopName || 'FRESH CHICKEN CENTER'}
+                    <div className="text-center min-w-0 flex-1 px-1">
+                      <h1 className="text-[clamp(13px,2.6vw,32px)] font-black tracking-wide uppercase text-slate-900 leading-tight">
+                        {settings.shopName || 'SSS CHICKEN AGENCY'}
                       </h1>
-                      {(settings.address || settings.phoneNumber || bill.billNumber) && (
-                        <p className="text-[clamp(9px,1.3vw,16px)] text-slate-500 font-medium mt-[0.6%] truncate">
-                          {[
-                            settings.address,
-                            settings.phoneNumber ? `Ph: ${settings.phoneNumber}` : null,
-                            `Bill #${bill.billNumber}`,
-                            `${bill.date} ${bill.time || ''}`,
-                          ]
-                            .filter(Boolean)
-                            .join('   •   ')}
+                      {settings.address && (
+                        <p className="text-[clamp(7.5px,1.1vw,13px)] text-slate-600 font-semibold leading-tight mt-[0.3%] uppercase">
+                          {settings.address}
                         </p>
                       )}
+                      <div className="flex items-center justify-center flex-wrap gap-x-2 text-[clamp(7.5px,1.05vw,12px)] text-slate-500 font-bold mt-[0.2%]">
+                        {settings.phoneNumber && <span>Ph: {settings.phoneNumber}</span>}
+                        {settings.gstNumber && <span className="text-emerald-800">GST: {settings.gstNumber}</span>}
+                        <span>Bill #{bill.billNumber}</span>
+                        <span>{bill.date} {bill.time || ''}</span>
+                      </div>
                     </div>
                   </div>
 
                   {/* Main Grid: Left Green 'item list' + Right 'total amount / kg / price' */}
-                  <div className="grid grid-cols-12 gap-[3%] flex-1 items-stretch py-[1.5%]">
+                  <div className="grid grid-cols-12 gap-[2.5%] flex-1 items-stretch py-[1%]">
                     {/* Left: Green Item List Box */}
-                    <div className="col-span-6 bg-[#60cf3a] rounded-[16px] sm:rounded-[22px] p-[3.5%] flex flex-col justify-between text-slate-900 shadow-sm overflow-hidden">
+                    <div className="col-span-6 bg-[#48bb17] rounded-[14px] sm:rounded-[20px] p-[3%] flex flex-col justify-between text-slate-900 shadow-sm overflow-hidden">
                       <div>
-                        <h2 className="text-[clamp(13px,2.6vw,30px)] font-black text-[#0f2409] tracking-tight leading-none mb-[2.5%]">
+                        <h2 className="text-[clamp(12px,2.2vw,26px)] font-black text-[#0a2205] tracking-tight leading-none mb-[2%]">
                           {t.itemList}
                         </h2>
                         {/* Items Table */}
-                        <div className="space-y-[1.8%]">
+                        <div className="space-y-[1.5%]">
                           {bill.items.slice(0, 5).map((item, idx) => (
                             <div
                               key={idx}
-                              className="bg-white/90 backdrop-blur-xs rounded-lg sm:rounded-xl px-[3%] py-[2%] flex items-center justify-between text-[clamp(9px,1.35vw,16px)] font-bold text-slate-900 shadow-2xs"
+                              className="bg-white/95 backdrop-blur-xs rounded-md sm:rounded-lg px-[2.5%] py-[1.5%] flex items-center justify-between text-[clamp(8.5px,1.2vw,14px)] font-bold text-slate-900 shadow-2xs"
                             >
-                              <span className="truncate max-w-[45%] font-extrabold">
+                              <span className="truncate max-w-[42%] font-extrabold">
                                 {item.productName}
                               </span>
                               <span className="text-slate-700">
@@ -419,7 +430,7 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
                             </div>
                           ))}
                           {bill.items.length > 5 && (
-                            <div className="text-center text-[clamp(8px,1.1vw,13px)] font-bold text-[#0f2409] pt-1">
+                            <div className="text-center text-[clamp(7.5px,0.95vw,11px)] font-bold text-[#0a2205] pt-0.5">
                               + {bill.items.length - 5} more item(s)
                             </div>
                           )}
@@ -427,50 +438,50 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
                       </div>
 
                       {/* Item count bottom hint */}
-                      <div className="text-[clamp(8px,1.1vw,13px)] font-bold text-[#143c0e] flex items-center justify-between pt-1 border-t border-[#4cb826]">
+                      <div className="text-[clamp(7.5px,0.95vw,11px)] font-bold text-[#0a2205] flex items-center justify-between pt-0.5 border-t border-[#389e0f]/50">
                         <span>{t.totalItems}: {bill.items.length}</span>
                         {bill.hotelName && <span>Hotel: {bill.hotelName}</span>}
                       </div>
                     </div>
 
                     {/* Right: Total Amount, KG, Price */}
-                    <div className="col-span-6 flex flex-col justify-between py-[1.5%] pl-[2%] pr-[1%]">
+                    <div className="col-span-6 flex flex-col justify-between py-[1%] pl-[1.5%] pr-[0.5%]">
                       {/* Top: total amount */}
                       <div>
-                        <h3 className="text-[clamp(14px,3.2vw,38px)] font-black text-slate-900 tracking-tight leading-none">
+                        <h3 className="text-[clamp(13px,2.5vw,32px)] font-black text-slate-900 tracking-tight leading-none">
                           {t.totalAmountHeader}
                         </h3>
-                        <div className="h-[2px] bg-slate-200 w-full mt-[2%]" />
+                        <div className="h-[2px] bg-slate-200 w-full mt-[1.5%]" />
                       </div>
 
                       {/* Middle: kg : 5kg */}
-                      <div className="flex items-baseline gap-[4%] text-slate-900 my-auto">
-                        <span className="text-[clamp(14px,3vw,36px)] font-bold text-slate-800">
+                      <div className="flex items-baseline gap-[3%] text-slate-900 my-auto">
+                        <span className="text-[clamp(12px,2.4vw,28px)] font-bold text-slate-800">
                           {t.kgLabel}
                         </span>
-                        <span className="text-[clamp(16px,3.6vw,44px)] font-black text-slate-950">
+                        <span className="text-[clamp(14px,2.8vw,36px)] font-black text-slate-950">
                           {bill.totalKg.toFixed(2)}kg
                         </span>
                       </div>
 
                       {/* Bottom: price : 1000 */}
-                      <div className="flex items-baseline gap-[4%] text-slate-900">
-                        <span className="text-[clamp(14px,3vw,36px)] font-bold text-slate-800">
+                      <div className="flex items-baseline gap-[3%] text-slate-900">
+                        <span className="text-[clamp(12px,2.4vw,28px)] font-bold text-slate-800">
                           {t.priceLabel}
                         </span>
-                        <span className="text-[clamp(18px,4.2vw,50px)] font-black text-emerald-800">
+                        <span className="text-[clamp(16px,3.4vw,42px)] font-black text-emerald-800">
                           ₹ {Math.round(bill.totalAmount)}
                         </span>
                       </div>
 
                       {/* Footer UPI / Thank you */}
-                      <div className="text-[clamp(8px,1.15vw,14px)] text-slate-500 font-semibold flex items-center justify-between pt-[2%] border-t border-slate-100">
+                      <div className="text-[clamp(7px,0.95vw,12px)] text-slate-500 font-semibold flex items-center justify-between pt-[1.5%] border-t border-slate-100">
                         {settings.upiId ? (
-                          <span>UPI: {settings.upiId}</span>
+                          <span className="truncate max-w-[65%]">UPI: {settings.upiId}</span>
                         ) : (
                           <span>Cash / Paid</span>
                         )}
-                        <span className="italic font-medium text-slate-400">
+                        <span className="italic font-medium text-slate-400 shrink-0 ml-1">
                           {t.thankYou}
                         </span>
                       </div>
@@ -480,7 +491,7 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
               </div>
 
               {/* Pixel size notice pill */}
-              <div className="mt-3 text-xs font-semibold text-slate-500 flex items-center gap-1.5 bg-white px-3.5 py-1.5 rounded-full border border-slate-200 shadow-2xs">
+              <div className="mt-2.5 text-xs font-semibold text-slate-500 flex items-center gap-1.5 bg-white px-3.5 py-1 rounded-full border border-slate-200 shadow-2xs">
                 <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
                 <span>{t.exactResolution}</span>
               </div>
@@ -491,17 +502,22 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
               id="printable-receipt"
               className="bg-white p-5 rounded-2xl shadow-sm border border-gray-200 text-gray-800 font-mono text-xs leading-relaxed w-full max-w-sm"
             >
-              <div className="text-center font-bold text-sm text-emerald-900 uppercase">
-                {settings.shopName || 'FRESH CHICKEN CENTER'}
+              <div className="text-center font-black text-base text-emerald-950 uppercase">
+                {settings.shopName || 'SSS CHICKEN AGENCY'}
               </div>
               {settings.address && (
-                <div className="text-center text-gray-500 text-[11px] mt-0.5">
+                <div className="text-center text-gray-600 text-[11px] uppercase mt-1 leading-snug">
                   {settings.address}
                 </div>
               )}
               {settings.phoneNumber && (
-                <div className="text-center text-gray-600 text-[11px]">
+                <div className="text-center text-gray-700 text-[11px] font-bold mt-0.5">
                   Ph: {settings.phoneNumber}
+                </div>
+              )}
+              {settings.gstNumber && (
+                <div className="text-center text-emerald-800 text-[11px] font-black">
+                  GST: {settings.gstNumber}
                 </div>
               )}
               <div className="border-t border-dashed border-gray-300 my-2.5" />
@@ -542,9 +558,17 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
                 <span>TOTAL WEIGHT:</span>
                 <span className="text-emerald-800">{bill.totalKg.toFixed(3)} KG</span>
               </div>
-              <div className="flex justify-between font-bold text-sm text-emerald-900 mt-1">
+              <div className="flex justify-between font-black text-sm text-emerald-950 mt-1">
                 <span>GRAND TOTAL:</span>
-                <span>₹ {bill.totalAmount.toFixed(2)}</span>
+                <span>₹ {Math.round(bill.totalAmount)}</span>
+              </div>
+              {settings.upiId && (
+                <div className="text-center text-[10px] text-gray-500 mt-2 font-medium">
+                  UPI: {settings.upiId}
+                </div>
+              )}
+              <div className="text-center text-[10px] text-gray-400 italic mt-1">
+                *** THANK YOU! VISIT AGAIN ***
               </div>
             </div>
           )}
