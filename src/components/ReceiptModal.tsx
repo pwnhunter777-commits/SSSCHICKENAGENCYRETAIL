@@ -358,23 +358,35 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
                 }}
               >
                 <div className="w-full h-full flex flex-col p-[2.5%] text-slate-900 justify-between select-none">
-                  {/* Top Company Name Header */}
-                  <div className="text-center pt-[0.5%] pb-[1%] border-b border-slate-100">
-                    <h1 className="text-[clamp(14px,3.2vw,36px)] font-black tracking-wide uppercase text-slate-900 leading-none">
-                      {settings.shopName || 'FRESH CHICKEN CENTER'}
-                    </h1>
-                    {(settings.address || settings.phoneNumber || bill.billNumber) && (
-                      <p className="text-[clamp(9px,1.3vw,16px)] text-slate-500 font-medium mt-[0.6%] truncate">
-                        {[
-                          settings.address,
-                          settings.phoneNumber ? `Ph: ${settings.phoneNumber}` : null,
-                          `Bill #${bill.billNumber}`,
-                          `${bill.date} ${bill.time || ''}`,
-                        ]
-                          .filter(Boolean)
-                          .join('   •   ')}
-                      </p>
-                    )}
+                  {/* Top Company Name Header with Mascot Logo */}
+                  <div className="flex items-center justify-center gap-3 pt-[0.5%] pb-[1%] border-b border-slate-100">
+                    <div className="w-[clamp(28px,4.5vw,52px)] h-[clamp(28px,4.5vw,52px)] rounded-full bg-white border-2 border-emerald-400 overflow-hidden shrink-0 shadow-xs flex items-center justify-center">
+                      <img
+                        src={settings.logoUrl || '/logo.png'}
+                        alt="Logo"
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          (e.currentTarget as HTMLElement).style.display = 'none';
+                        }}
+                      />
+                    </div>
+                    <div className="text-center">
+                      <h1 className="text-[clamp(14px,3.2vw,36px)] font-black tracking-wide uppercase text-slate-900 leading-none">
+                        {settings.shopName || 'FRESH CHICKEN CENTER'}
+                      </h1>
+                      {(settings.address || settings.phoneNumber || bill.billNumber) && (
+                        <p className="text-[clamp(9px,1.3vw,16px)] text-slate-500 font-medium mt-[0.6%] truncate">
+                          {[
+                            settings.address,
+                            settings.phoneNumber ? `Ph: ${settings.phoneNumber}` : null,
+                            `Bill #${bill.billNumber}`,
+                            `${bill.date} ${bill.time || ''}`,
+                          ]
+                            .filter(Boolean)
+                            .join('   •   ')}
+                        </p>
+                      )}
+                    </div>
                   </div>
 
                   {/* Main Grid: Left Green 'item list' + Right 'total amount / kg / price' */}

@@ -8,6 +8,12 @@ import {
   Save,
   CheckCircle2,
   Building,
+  Lock,
+  KeyRound,
+  ShieldCheck,
+  Eye,
+  EyeOff,
+  Image as ImageIcon,
 } from 'lucide-react';
 import { ShopSettings, Language } from '../types';
 import { TRANSLATIONS } from '../utils/translations';
@@ -27,8 +33,10 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
   const t = TRANSLATIONS[language] || TRANSLATIONS.en;
   const [formData, setFormData] = useState<ShopSettings>({ ...settings });
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [showPin, setShowPin] = useState(false);
+  const [pinError, setPinError] = useState<string | null>(null);
 
-  const handleChange = (field: keyof ShopSettings, value: string) => {
+  const handleChange = (field: keyof ShopSettings, value: any) => {
     setFormData((prev) => ({
       ...prev,
       [field]: value,
@@ -37,6 +45,16 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validate PIN if enabled
+    if (formData.pinProtectionEnabled) {
+      if (!formData.securityPin || formData.securityPin.length < 4) {
+        setPinError(t.pinInvalid);
+        return;
+      }
+    }
+    setPinError(null);
+
     setSettings(formData);
     saveShopSettings(formData);
     setToastMessage(t.settingsSaved);
@@ -53,18 +71,27 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
         </div>
       )}
 
-      {/* Page Title */}
+      {/* Page Title & Shop Logo Banner */}
       <div className="bg-white rounded-2xl p-4 shadow-sm border border-emerald-200 mb-4 flex items-center justify-between">
-        <div>
-          <div className="text-[11px] font-bold uppercase tracking-wider text-emerald-700">
-            {t.shopInfo}
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 rounded-2xl bg-white border-2 border-emerald-500 flex items-center justify-center overflow-hidden shadow-xs shrink-0">
+            <img
+              src={formData.logoUrl || '/logo.png'}
+              alt="Chicken Logo"
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                (e.currentTarget as HTMLElement).style.display = 'none';
+              }}
+            />
           </div>
-          <h2 className="text-lg font-extrabold text-emerald-950 mt-0.5">
-            {t.settings}
-          </h2>
-        </div>
-        <div className="w-10 h-10 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-700">
-          <Store className="w-5 h-5" />
+          <div>
+            <div className="text-[11px] font-bold uppercase tracking-wider text-emerald-700">
+              {t.shopInfo}
+            </div>
+            <h2 className="text-lg font-extrabold text-emerald-950 mt-0.5">
+              {t.settings}
+            </h2>
+          </div>
         </div>
       </div>
 
@@ -179,6 +206,121 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
               / {language === 'ta' ? 'கிலோ' : 'Kg'}
             </span>
           </div>
+        </div>
+
+        {/* 7. Password & Security PIN (PWD) Protection */}
+        <div className="bg-white rounded-2xl p-4 shadow-sm border-2 border-emerald-500/40 transition-all">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-800">
+                <KeyRound className="w-4 h-4" />
+              </div>
+              <div>
+                <h3 className="font-extrabold text-sm text-slate-900">
+                  7. {t.securityPinSettings}
+                </h3>
+                <p className="text-[11px] text-slate-500 font-medium leading-tight">
+                  {t.securityPinDesc}
+                </p>
+              </div>
+            </div>
+
+            {/* Master Toggle Switch */}
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={!!formData.pinProtectionEnabled}
+                onChange={(e) => handleChange('pinProtectionEnabled', e.target.checked)}
+                className="sr-only peer"
+              />
+              <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-700"></div>
+            </label>
+          </div>
+
+          {formData.pinProtectionEnabled && (
+            <div className="mt-3 pt-3 border-t border-slate-100 space-y-3 animate-in fade-in">
+              {/* 4-digit PIN Field */}
+              <div>
+                <label className="flex items-center justify-between text-xs font-bold text-slate-700 mb-1">
+                  <span>{t.enterNewPin} (PWD)</span>
+                  <span className="text-[10px] text-slate-500 font-normal">
+                    Default: <strong>1234</strong>
+                  </span>
+                </label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+                    <Lock className="w-4 h-4" />
+                  </span>
+                  <input
+                    type={showPin ? 'text' : 'password'}
+                    maxLength={6}
+                    pattern="[0-9]*"
+                    inputMode="numeric"
+                    value={formData.securityPin || '1234'}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/\D/g, '');
+                      handleChange('securityPin', val);
+                      setPinError(null);
+                    }}
+                    placeholder="1234"
+                    className="w-full bg-emerald-50/40 border-2 border-emerald-200 focus:border-emerald-600 focus:bg-white text-slate-900 font-black tracking-widest text-base py-2 pl-9 pr-12 rounded-xl outline-none transition-all"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPin(!showPin)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 p-1"
+                  >
+                    {showPin ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+                {pinError && (
+                  <p className="text-red-600 text-xs font-bold mt-1">
+                    {pinError}
+                  </p>
+                )}
+              </div>
+
+              {/* Protection Granular Options */}
+              <div className="bg-slate-50 rounded-xl p-2.5 border border-slate-200 space-y-2 text-xs">
+                <label className="flex items-center gap-2 cursor-pointer font-medium text-slate-800">
+                  <input
+                    type="checkbox"
+                    checked={formData.protectDailyPrice ?? true}
+                    onChange={(e) => handleChange('protectDailyPrice', e.target.checked)}
+                    className="rounded text-emerald-700 focus:ring-emerald-500 w-4 h-4"
+                  />
+                  <span>{t.protectDailyPriceOpt}</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer font-medium text-slate-800">
+                  <input
+                    type="checkbox"
+                    checked={formData.protectSettings ?? true}
+                    onChange={(e) => handleChange('protectSettings', e.target.checked)}
+                    className="rounded text-emerald-700 focus:ring-emerald-500 w-4 h-4"
+                  />
+                  <span>{t.protectSettingsOpt}</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer font-medium text-slate-800">
+                  <input
+                    type="checkbox"
+                    checked={formData.protectBillDelete ?? true}
+                    onChange={(e) => handleChange('protectBillDelete', e.target.checked)}
+                    className="rounded text-emerald-700 focus:ring-emerald-500 w-4 h-4"
+                  />
+                  <span>{t.protectBillDeleteOpt}</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer font-medium text-slate-800">
+                  <input
+                    type="checkbox"
+                    checked={formData.protectAppLock ?? false}
+                    onChange={(e) => handleChange('protectAppLock', e.target.checked)}
+                    className="rounded text-emerald-700 focus:ring-emerald-500 w-4 h-4"
+                  />
+                  <span>{t.protectAppLockOpt}</span>
+                </label>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Save Button */}

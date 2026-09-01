@@ -32,6 +32,14 @@ export interface ShopSettings {
   address: string;
   upiId: string;
   withoutSkinOffset?: number; // Extra amount added to With Skin rate for Without Skin (default +50)
+  // Password / Security PIN (PWD) configuration
+  securityPin?: string; // 4-digit PIN (default '1234')
+  pinProtectionEnabled?: boolean; // master toggle
+  protectDailyPrice?: boolean; // require PIN to edit daily rates
+  protectSettings?: boolean; // require PIN to open settings
+  protectBillDelete?: boolean; // require PIN to delete a bill in register
+  protectAppLock?: boolean; // require PIN on startup / manual lock
+  logoUrl?: string; // custom logo url or default /logo.png
 }
 
 export interface BillItem {

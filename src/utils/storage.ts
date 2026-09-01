@@ -23,6 +23,13 @@ export const DEFAULT_SETTINGS: ShopSettings = {
   address: 'Main Bazaar Road, Market Area',
   upiId: 'chickenstore@upi',
   withoutSkinOffset: 50,
+  securityPin: '1234',
+  pinProtectionEnabled: false,
+  protectDailyPrice: true,
+  protectSettings: true,
+  protectBillDelete: true,
+  protectAppLock: false,
+  logoUrl: '/logo.png',
 };
 
 export const DEFAULT_AROMAKE_HOTELS: string[] = [
@@ -186,6 +193,13 @@ export function loadShopSettings(): ShopSettings {
       return {
         ...DEFAULT_SETTINGS,
         ...parsed,
+        securityPin: parsed.securityPin || '1234',
+        pinProtectionEnabled: parsed.pinProtectionEnabled ?? false,
+        protectDailyPrice: parsed.protectDailyPrice ?? true,
+        protectSettings: parsed.protectSettings ?? true,
+        protectBillDelete: parsed.protectBillDelete ?? true,
+        protectAppLock: parsed.protectAppLock ?? false,
+        logoUrl: parsed.logoUrl || '/logo.png',
         withoutSkinOffset:
           parsed.withoutSkinOffset !== undefined
             ? Number(parsed.withoutSkinOffset)
