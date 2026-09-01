@@ -17,11 +17,12 @@ export const DEFAULT_PRODUCTS: Product[] = [
 ];
 
 export const DEFAULT_SETTINGS: ShopSettings = {
-  shopName: 'Fresh Chicken Center',
-  phoneNumber: '9876543210',
-  gstNumber: '33AAAAA0000A1Z5',
-  address: 'Main Bazaar Road, Market Area',
-  upiId: 'chickenstore@upi',
+  shopName: 'SSS CHICKEN AGENCY',
+  phoneNumber: '8680000003',
+  gstNumber: '34AQPN8846J2ZF',
+  address: 'NO 6, PONDY MAIN ROAD, SULTHANPET, VILLIANUR, PUDUCHERRY - 605 110',
+  upiId: 'NAZIRAHAMED0003@okhdfcbank',
+  billPrintWidth: 17,
   withoutSkinOffset: 50,
   securityPin: '1234',
   pinProtectionEnabled: false,
@@ -190,9 +191,20 @@ export function loadShopSettings(): ShopSettings {
     const raw = localStorage.getItem(STORAGE_KEYS.SETTINGS);
     if (raw) {
       const parsed = JSON.parse(raw);
-      return {
+      const isOldPlaceholder =
+        !parsed.shopName ||
+        parsed.shopName === 'Fresh Chicken Center' ||
+        parsed.phoneNumber === '9876543210';
+
+      const upgradedSettings: ShopSettings = {
         ...DEFAULT_SETTINGS,
         ...parsed,
+        shopName: isOldPlaceholder ? DEFAULT_SETTINGS.shopName : (parsed.shopName || DEFAULT_SETTINGS.shopName),
+        phoneNumber: isOldPlaceholder ? DEFAULT_SETTINGS.phoneNumber : (parsed.phoneNumber || DEFAULT_SETTINGS.phoneNumber),
+        gstNumber: isOldPlaceholder ? DEFAULT_SETTINGS.gstNumber : (parsed.gstNumber || DEFAULT_SETTINGS.gstNumber),
+        address: isOldPlaceholder ? DEFAULT_SETTINGS.address : (parsed.address || DEFAULT_SETTINGS.address),
+        upiId: isOldPlaceholder ? DEFAULT_SETTINGS.upiId : (parsed.upiId || DEFAULT_SETTINGS.upiId),
+        billPrintWidth: parsed.billPrintWidth ? Number(parsed.billPrintWidth) : 17,
         securityPin: parsed.securityPin || '1234',
         pinProtectionEnabled: parsed.pinProtectionEnabled ?? false,
         protectDailyPrice: parsed.protectDailyPrice ?? true,
@@ -205,6 +217,11 @@ export function loadShopSettings(): ShopSettings {
             ? Number(parsed.withoutSkinOffset)
             : 50,
       };
+
+      if (isOldPlaceholder) {
+        saveShopSettings(upgradedSettings);
+      }
+      return upgradedSettings;
     }
   } catch (e) {
     console.error('Error loading settings from localStorage', e);

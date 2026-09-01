@@ -1,6 +1,6 @@
 {
-  "name": "Chicken Billing App",
-  "description": "A fast, clean mobile chicken shop billing application with daily price management, automated KG/price calculation, register, sales totals, and Bluetooth printing.",
+  "name": "SSS Chicken Agency",
+  "description": "Fast mobile chicken shop billing and POS terminal with daily price management, automated KG/price calculation, register, sales totals, and Bluetooth printing.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

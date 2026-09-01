@@ -2,17 +2,37 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Chicken Billing App</title>
-    <meta name="description" content="A fast, clean mobile chicken shop billing application with daily price management, automated KG/price calculation, register, sales totals, and Bluetooth printing." />
-    <meta property="og:title" content="Chicken Billing App" />
-    <meta property="og:description" content="A fast, clean mobile chicken shop billing application with daily price management, automated KG/price calculation, register, sales totals, and Bluetooth printing." />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>SSS Chicken Agency - POS Billing</title>
+    <meta name="description" content="SSS Chicken Agency - Fast mobile chicken shop billing and POS terminal with daily price management, automated KG/price calculation, register, sales totals, and Bluetooth printing." />
+    <meta property="og:title" content="SSS Chicken Agency - POS Billing" />
+    <meta property="og:description" content="SSS Chicken Agency - Fast mobile chicken shop billing and POS terminal with daily price management, automated KG/price calculation, register, sales totals, and Bluetooth printing." />
     <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary_large_image" />
+
+    <!-- PWA Web App Manifest & Mobile Standalone Icons -->
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#065f46" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Chicken POS" />
+    <link rel="apple-touch-icon" href="/logo.png" />
+    <link rel="icon" type="image/png" href="/logo.png" />
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      // Service Worker registration for PWA install & offline capabilities
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js').catch((err) => {
+            console.log('SW registration note:', err);
+          });
+        });
+      }
+    </script>
   </body>
 </html>
 

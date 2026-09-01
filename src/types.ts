@@ -40,6 +40,7 @@ export interface ShopSettings {
   protectBillDelete?: boolean; // require PIN to delete a bill in register
   protectAppLock?: boolean; // require PIN on startup / manual lock
   logoUrl?: string; // custom logo url or default /logo.png
+  billPrintWidth?: number; // Bill Print Width in cm (default 17)
 }
 
 export interface BillItem {

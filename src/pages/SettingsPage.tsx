@@ -13,11 +13,15 @@ import {
   ShieldCheck,
   Eye,
   EyeOff,
-  Image as ImageIcon,
+  Download,
+  Smartphone,
+  WifiOff,
+  Printer,
 } from 'lucide-react';
 import { ShopSettings, Language } from '../types';
 import { TRANSLATIONS } from '../utils/translations';
 import { saveShopSettings } from '../utils/storage';
+import { InstallAppModal } from '../components/InstallAppModal';
 
 interface SettingsPageProps {
   settings: ShopSettings;
@@ -35,6 +39,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [showPin, setShowPin] = useState(false);
   const [pinError, setPinError] = useState<string | null>(null);
+  const [showInstallModal, setShowInstallModal] = useState(false);
 
   const handleChange = (field: keyof ShopSettings, value: any) => {
     setFormData((prev) => ({
@@ -71,35 +76,65 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
         </div>
       )}
 
-      {/* Page Title & Shop Logo Banner */}
-      <div className="bg-white rounded-2xl p-4 shadow-sm border border-emerald-200 mb-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-2xl bg-white border-2 border-emerald-500 flex items-center justify-center overflow-hidden shadow-xs shrink-0">
-            <img
-              src={formData.logoUrl || '/logo.png'}
-              alt="Chicken Logo"
-              className="w-full h-full object-cover"
-              onError={(e) => {
-                (e.currentTarget as HTMLElement).style.display = 'none';
-              }}
-            />
+      {/* Top Store Badge Card (Matching Screenshot) */}
+      <div className="bg-[#064e3b] text-white rounded-3xl p-4 shadow-lg mb-4 flex items-center gap-3.5 border border-emerald-700/50">
+        <div className="w-14 h-14 rounded-2xl bg-white p-1 border-2 border-emerald-400 flex items-center justify-center overflow-hidden shrink-0 shadow-md">
+          <img
+            src={formData.logoUrl || '/logo.png'}
+            alt="Chicken Logo"
+            className="w-full h-full object-cover rounded-xl"
+            onError={(e) => {
+              (e.currentTarget as HTMLElement).style.display = 'none';
+            }}
+          />
+        </div>
+        <div className="min-w-0 flex-1">
+          <h2 className="text-base sm:text-lg font-black tracking-wide text-white uppercase truncate">
+            {formData.shopName || 'SSS CHICKEN AGENCY'}
+          </h2>
+          <div className="flex items-center gap-1.5 text-xs text-emerald-200 font-bold mt-0.5">
+            <Phone className="w-3.5 h-3.5 text-emerald-300 shrink-0" />
+            <span>{formData.phoneNumber || '8680000003'}</span>
           </div>
-          <div>
-            <div className="text-[11px] font-bold uppercase tracking-wider text-emerald-700">
-              {t.shopInfo}
+          {formData.gstNumber && (
+            <div className="text-[11px] font-extrabold text-amber-300 tracking-wider mt-0.5">
+              GST: {formData.gstNumber}
             </div>
-            <h2 className="text-lg font-extrabold text-emerald-950 mt-0.5">
-              {t.settings}
-            </h2>
+          )}
+        </div>
+      </div>
+
+      {/* App Installation / PWA Quick Banner */}
+      <div className="bg-gradient-to-r from-emerald-800 to-emerald-900 text-white rounded-2xl p-3.5 shadow-md mb-3.5 flex items-center justify-between">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center shrink-0">
+            <Smartphone className="w-5 h-5 text-emerald-200" />
+          </div>
+          <div className="truncate">
+            <div className="text-xs font-black text-white leading-tight">
+              {t.installApp}
+            </div>
+            <div className="text-[10px] text-emerald-200 font-medium truncate flex items-center gap-1 mt-0.5">
+              <WifiOff className="w-3 h-3 text-emerald-300" />
+              <span>{t.pwaOfflineReady}</span>
+            </div>
           </div>
         </div>
+
+        <button
+          type="button"
+          onClick={() => setShowInstallModal(true)}
+          className="bg-white hover:bg-emerald-50 text-emerald-900 font-extrabold text-xs px-3 py-2 rounded-xl shrink-0 shadow-xs active:scale-95 transition-all"
+        >
+          {t.howToInstall}
+        </button>
       </div>
 
       {/* Settings Form */}
       <form onSubmit={handleSubmit} className="space-y-3.5">
         {/* 1. Shop Name */}
         <div className="bg-white rounded-2xl p-3.5 shadow-sm border border-emerald-100 focus-within:border-emerald-600 transition-all">
-          <label className="flex items-center gap-1.5 text-xs font-bold text-gray-700 mb-1.5">
+          <label className="flex items-center gap-1.5 text-xs font-bold text-gray-700 mb-1">
             <Building className="w-4 h-4 text-emerald-700" />
             <span>1. {t.shopName}</span>
           </label>
@@ -108,9 +143,12 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
             required
             value={formData.shopName}
             onChange={(e) => handleChange('shopName', e.target.value)}
-            placeholder="e.g. Fresh Chicken Center"
-            className="w-full bg-emerald-50/40 border-2 border-emerald-200 focus:border-emerald-600 focus:bg-white text-gray-900 font-bold text-sm py-2 px-3 rounded-xl outline-none transition-all"
+            placeholder="e.g. SSS CHICKEN AGENCY"
+            className="w-full bg-emerald-50/40 border-2 border-emerald-200 focus:border-emerald-600 focus:bg-white text-gray-900 font-extrabold text-sm py-2 px-3 rounded-xl outline-none transition-all uppercase"
           />
+          <p className="text-[11px] text-gray-500 italic mt-1 font-medium">
+            {t.shopNameSubtitle || 'This name appears at the top header and on printed bills.'}
+          </p>
         </div>
 
         {/* 2. Phone Number */}
@@ -123,7 +161,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
             type="tel"
             value={formData.phoneNumber}
             onChange={(e) => handleChange('phoneNumber', e.target.value)}
-            placeholder="e.g. 9876543210"
+            placeholder="e.g. 8680000003"
             className="w-full bg-emerald-50/40 border-2 border-emerald-200 focus:border-emerald-600 focus:bg-white text-gray-900 font-bold text-sm py-2 px-3 rounded-xl outline-none transition-all"
           />
         </div>
@@ -138,7 +176,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
             type="text"
             value={formData.gstNumber}
             onChange={(e) => handleChange('gstNumber', e.target.value)}
-            placeholder="e.g. 33AAAAA0000A1Z5"
+            placeholder="e.g. 34AQPN8846J2ZF"
             className="w-full bg-emerald-50/40 border-2 border-emerald-200 focus:border-emerald-600 focus:bg-white text-gray-900 font-bold text-sm py-2 px-3 rounded-xl outline-none transition-all uppercase"
           />
         </div>
@@ -153,8 +191,8 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
             rows={2}
             value={formData.address}
             onChange={(e) => handleChange('address', e.target.value)}
-            placeholder="e.g. Main Bazaar Road, Market Area"
-            className="w-full bg-emerald-50/40 border-2 border-emerald-200 focus:border-emerald-600 focus:bg-white text-gray-900 font-medium text-sm py-2 px-3 rounded-xl outline-none transition-all resize-none"
+            placeholder="e.g. NO 6, PONDY MAIN ROAD, SULTHANPET, VILLIANUR, PUDUCHERRY - 605 110"
+            className="w-full bg-emerald-50/40 border-2 border-emerald-200 focus:border-emerald-600 focus:bg-white text-gray-900 font-semibold text-xs uppercase py-2 px-3 rounded-xl outline-none transition-all resize-none"
           />
         </div>
 
@@ -168,17 +206,45 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
             type="text"
             value={formData.upiId}
             onChange={(e) => handleChange('upiId', e.target.value)}
-            placeholder="e.g. chickenstore@upi"
+            placeholder="e.g. NAZIRAHAMED0003@okhdfcbank"
             className="w-full bg-emerald-50/40 border-2 border-emerald-200 focus:border-emerald-600 focus:bg-white text-gray-900 font-bold text-sm py-2 px-3 rounded-xl outline-none transition-all"
           />
         </div>
 
-        {/* 6. Without Skin Rate Increase */}
+        {/* 6. Bill Print Width */}
+        <div className="bg-white rounded-2xl p-3.5 shadow-sm border border-emerald-100 focus-within:border-emerald-600 transition-all">
+          <label className="flex items-center gap-1.5 text-xs font-bold text-gray-700 mb-1.5">
+            <Printer className="w-4 h-4 text-emerald-700" />
+            <span>6. {t.billPrintWidth || 'Bill Print Width'}</span>
+          </label>
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <input
+                type="number"
+                min="5"
+                max="50"
+                value={formData.billPrintWidth || 17}
+                onChange={(e) =>
+                  handleChange('billPrintWidth', parseInt(e.target.value) || 17)
+                }
+                className="w-24 bg-emerald-50/40 border-2 border-emerald-200 focus:border-emerald-600 focus:bg-white text-gray-900 font-black text-center text-sm py-2 px-2 rounded-xl outline-none transition-all"
+              />
+              <span className="text-xs font-bold text-emerald-900">
+                {t.billPrintWidthUnit || 'cm (செ.மீ)'}
+              </span>
+            </div>
+            <span className="text-xs text-slate-500 italic">
+              {t.defaultPrintWidth || 'Default: 17 cm'}
+            </span>
+          </div>
+        </div>
+
+        {/* 7. Without Skin Rate Increase */}
         <div className="bg-white rounded-2xl p-3.5 shadow-sm border border-emerald-200 focus-within:border-emerald-600 transition-all">
           <label className="flex items-center justify-between text-xs font-bold text-gray-800 mb-1.5">
             <span className="flex items-center gap-1.5">
               <Store className="w-4 h-4 text-emerald-700" />
-              <span>6. {t.withoutSkinOffsetTitle} (+ ₹ / {language === 'ta' ? 'கிலோ' : 'Kg'})</span>
+              <span>7. {t.withoutSkinOffsetTitle} (+ ₹ / {language === 'ta' ? 'கிலோ' : 'Kg'})</span>
             </span>
             <span className="text-[10px] text-emerald-700 font-semibold bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
               {t.addedToWithSkin}
@@ -334,6 +400,15 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
           </button>
         </div>
       </form>
+
+      {/* PWA Install Modal */}
+      <InstallAppModal
+        isOpen={showInstallModal}
+        onClose={() => setShowInstallModal(false)}
+        language={language}
+        settings={formData}
+      />
     </div>
   );
 };
+

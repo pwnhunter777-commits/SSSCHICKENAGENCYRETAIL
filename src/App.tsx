@@ -20,6 +20,7 @@ import { RegisterPage } from './pages/RegisterPage';
 import { TotalPage } from './pages/TotalPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { PinPromptModal } from './components/PinPromptModal';
+import { InstallAppModal } from './components/InstallAppModal';
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState<Page>('daily-price');
@@ -34,6 +35,7 @@ export default function App() {
   });
   const [language, setLanguage] = useState<Language>('en');
   const [isLoaded, setIsLoaded] = useState(false);
+  const [showInstallModal, setShowInstallModal] = useState(false);
 
   // Security Lock & PIN State
   const [isAppLocked, setIsAppLocked] = useState(false);
@@ -136,6 +138,7 @@ export default function App() {
           currentLanguage={language}
           onLanguageChange={handleLanguageChange}
           onLockClick={handleManualLock}
+          onInstallClick={() => setShowInstallModal(true)}
         />
 
         {/* Main Body - Exactly 5 Pages */}
@@ -186,6 +189,14 @@ export default function App() {
           currentPage={currentPage}
           onPageChange={handlePageNavigation}
           language={language}
+        />
+
+        {/* PWA App Install Modal */}
+        <InstallAppModal
+          isOpen={showInstallModal}
+          onClose={() => setShowInstallModal(false)}
+          language={language}
+          settings={settings}
         />
 
         {/* Security PIN / PWD Lock Prompt Modal */}

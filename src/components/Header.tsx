@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Globe, Calendar, Store, Lock } from 'lucide-react';
+import { Globe, Calendar, Store, Lock, Download } from 'lucide-react';
 import { Language, ShopSettings } from '../types';
 import { LANGUAGES, TRANSLATIONS } from '../utils/translations';
 import { formatDisplayDate } from '../utils/storage';
@@ -9,6 +9,7 @@ interface HeaderProps {
   currentLanguage: Language;
   onLanguageChange: (lang: Language) => void;
   onLockClick?: () => void;
+  onInstallClick?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -16,6 +17,7 @@ export const Header: React.FC<HeaderProps> = ({
   currentLanguage,
   onLanguageChange,
   onLockClick,
+  onInstallClick,
 }) => {
   const [showLangMenu, setShowLangMenu] = useState(false);
   const [imgError, setImgError] = useState(false);
@@ -59,8 +61,20 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
         </div>
 
-        {/* Action Controls: Lock button & Language Selector */}
+        {/* Action Controls: Install App, Lock button & Language Selector */}
         <div className="relative shrink-0 flex items-center gap-1.5">
+          {/* Quick Install PWA Button */}
+          {onInstallClick && (
+            <button
+              type="button"
+              onClick={onInstallClick}
+              title={t.installApp}
+              className="p-1.5 rounded-full bg-emerald-900/80 hover:bg-emerald-950 text-emerald-200 hover:text-white border border-emerald-600/70 active:scale-95 transition-all"
+            >
+              <Download className="w-3.5 h-3.5" />
+            </button>
+          )}
+
           {/* Quick Lock Button */}
           {onLockClick && (
             <button
