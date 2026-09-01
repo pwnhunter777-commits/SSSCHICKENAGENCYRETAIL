@@ -2,16 +2,18 @@ import { Bill, ShopSettings, Language } from '../types';
 
 /**
  * Format plain text receipt with clean 32-column alignment for 58mm / 80mm thermal printers
+ * Uses strictly standard ASCII characters and CRLF line breaks to ensure 100% printer compatibility.
  */
 export function formatBillReceiptText(bill: Bill, settings: ShopSettings, language: Language = 'en'): string {
-  const line = '--------------------------------';
-  const dLine = '================================';
+  const line = '--------------------------------\r\n';
+  const dLine = '================================\r\n';
 
   let receipt = '';
-  // Header
-  receipt += `${(settings.shopName || 'SSS CHICKEN AGENCY').toUpperCase()}\n`;
+  // Header (Centered where possible)
+  const shop = (settings.shopName || 'SSS CHICKEN AGENCY').toUpperCase();
+  receipt += `${shop}\r\n`;
+
   if (settings.address) {
-    // Format address across lines cleanly if long
     const addr = settings.address.trim();
     if (addr.length > 32) {
       const parts = addr.split(',');
@@ -22,92 +24,96 @@ export function formatBillReceiptText(bill: Bill, settings: ShopSettings, langua
           if ((curLine + ' ' + piece).trim().length <= 32) {
             curLine = (curLine + ' ' + piece).trim();
           } else {
-            if (curLine) receipt += `${curLine}\n`;
+            if (curLine) receipt += `${curLine}\r\n`;
             curLine = piece;
           }
         });
-        if (curLine) receipt += `${curLine}\n`;
+        if (curLine) receipt += `${curLine}\r\n`;
       } else {
-        receipt += `${addr.substring(0, 32)}\n${addr.substring(32)}\n`;
+        receipt += `${addr.substring(0, 32)}\r\n${addr.substring(32)}\r\n`;
       }
     } else {
-      receipt += `${addr}\n`;
+      receipt += `${addr}\r\n`;
     }
   }
+
   if (settings.phoneNumber) {
-    receipt += `Ph: ${settings.phoneNumber}\n`;
+    receipt += `Ph: ${settings.phoneNumber}\r\n`;
   }
   if (settings.gstNumber) {
-    receipt += `GST: ${settings.gstNumber}\n`;
+    receipt += `GST: ${settings.gstNumber}\r\n`;
   }
-  receipt += `${dLine}\n`;
+  receipt += dLine;
 
   // Bill metadata
-  receipt += `Bill No: #${bill.billNumber}\n`;
-  receipt += `Date: ${bill.date}  ${bill.time || ''}\n`;
+  receipt += `Bill No: #${bill.billNumber}\r\n`;
+  receipt += `Date: ${bill.date}  ${bill.time || ''}\r\n`;
   if (bill.hotelName) {
-    receipt += `Hotel/Cust: ${bill.hotelName}\n`;
+    receipt += `Hotel: ${bill.hotelName}\r\n`;
   }
-  receipt += `${line}\n`;
+  receipt += line;
 
   // Table header
-  receipt += `ITEM               QTY    AMOUNT\n`;
-  receipt += `${line}\n`;
+  receipt += `ITEM               QTY    AMOUNT\r\n`;
+  receipt += line;
 
-  // Items - clear 2-line layout per item so full details and quantities are always visible
+  // Items - 2-line layout per item
   bill.items.forEach((item, index) => {
-    const rawName = (language === 'ta' && item.productNameTa ? item.productNameTa : (item.productNameEn || item.productName)) || 'Chicken';
-    const num = `${index + 1}. `;
-    receipt += `${num}${rawName}\n`;
+    // Standard ASCII name
+    const rawName = item.productNameEn || item.productName || 'Chicken';
+    const cleanName = rawName.replace(/[^\x20-\x7E]/g, '').trim() || 'Chicken';
+    receipt += `${index + 1}. ${cleanName}\r\n`;
     const qtyStr = `   ${item.kg.toFixed(2)} kg x Rs.${item.pricePerKg}`;
     const amtStr = `Rs.${Math.round(item.amount)}`;
     const spaces = Math.max(1, 32 - qtyStr.length - amtStr.length);
-    receipt += `${qtyStr}${' '.repeat(spaces)}${amtStr}\n`;
+    receipt += `${qtyStr}${' '.repeat(spaces)}${amtStr}\r\n`;
   });
 
   // Totals
-  receipt += `${line}\n`;
-  receipt += `TOTAL WEIGHT :  ${bill.totalKg.toFixed(3)} KG\n`;
-  receipt += `${line}\n`;
-  receipt += `GRAND TOTAL  :  Rs. ${Math.round(bill.totalAmount)}\n`;
-  receipt += `${dLine}\n`;
+  receipt += line;
+  receipt += `TOTAL WEIGHT :  ${bill.totalKg.toFixed(3)} KG\r\n`;
+  receipt += line;
+  receipt += `GRAND TOTAL  :  Rs. ${Math.round(bill.totalAmount)}\r\n`;
+  receipt += dLine;
 
   if (settings.upiId) {
-    receipt += `UPI: ${settings.upiId}\n`;
+    receipt += `UPI: ${settings.upiId}\r\n`;
   }
-  receipt += `*** THANK YOU! VISIT AGAIN ***\n\n\n\n\n`;
+  receipt += `*** THANK YOU! VISIT AGAIN ***\r\n\r\n\r\n\r\n\r\n`;
   return receipt;
 }
 
 /**
  * Generate binary ESC/POS command buffer for thermal receipt printers
- * Uses standard ESC ! and ESC E/a commands supported across 100% of 58mm/80mm printers
+ * Safe commands supported across 100% of 58mm & 80mm mini POS printers.
  */
 export function generateEscPosBytes(bill: Bill, settings: ShopSettings, language: Language = 'en'): Uint8Array {
   const encoder = new TextEncoder();
   const buffer: number[] = [];
 
-  const pushBytes = (bytes: number[]) => {
+  const pushBytes = (...bytes: number[]) => {
     for (let i = 0; i < bytes.length; i++) buffer.push(bytes[i]);
   };
 
   const pushText = (text: string) => {
-    const encoded = encoder.encode(text);
+    // Ensure clean ASCII to prevent character set corruption in POS printers
+    const safeText = text.replace(/[^\x00-\x7F]/g, '');
+    const encoded = encoder.encode(safeText);
     for (let i = 0; i < encoded.length; i++) buffer.push(encoded[i]);
   };
 
   // 1. Initialize printer (ESC @)
-  pushBytes([0x1B, 0x40]);
+  pushBytes(0x1B, 0x40);
 
-  // 2. Header (Center Align)
-  pushBytes([0x1B, 0x61, 0x01]); // Center align
+  // 2. Header (Center Align: ESC a 1)
+  pushBytes(0x1B, 0x61, 0x01);
 
-  // Shop Name in BIG SIZE BOLD (ESC ! 0x38 = Double Height + Double Width + Bold)
-  pushBytes([0x1B, 0x21, 0x38]);
-  pushText(`${settings.shopName || 'SSS CHICKEN AGENCY'}\n`);
-
-  // Switch back to normal font size (ESC ! 0x00)
-  pushBytes([0x1B, 0x21, 0x00]);
+  // Shop Name in Bold Double-Height (ESC ! 0x10)
+  pushBytes(0x1B, 0x21, 0x10);
+  pushBytes(0x1B, 0x45, 0x01); // Bold ON
+  pushText(`${settings.shopName || 'SSS CHICKEN AGENCY'}\r\n`);
+  pushBytes(0x1B, 0x21, 0x00); // Normal size
+  pushBytes(0x1B, 0x45, 0x00); // Bold OFF
 
   if (settings.address) {
     const addr = settings.address.trim();
@@ -120,91 +126,96 @@ export function generateEscPosBytes(bill: Bill, settings: ShopSettings, language
           if ((curLine + ' ' + piece).trim().length <= 32) {
             curLine = (curLine + ' ' + piece).trim();
           } else {
-            if (curLine) pushText(`${curLine}\n`);
+            if (curLine) pushText(`${curLine}\r\n`);
             curLine = piece;
           }
         });
-        if (curLine) pushText(`${curLine}\n`);
+        if (curLine) pushText(`${curLine}\r\n`);
       } else {
-        pushText(`${addr.substring(0, 32)}\n${addr.substring(32)}\n`);
+        pushText(`${addr.substring(0, 32)}\r\n${addr.substring(32)}\r\n`);
       }
     } else {
-      pushText(`${addr}\n`);
+      pushText(`${addr}\r\n`);
     }
   }
 
   if (settings.phoneNumber) {
-    pushText(`Ph: ${settings.phoneNumber}\n`);
+    pushText(`Ph: ${settings.phoneNumber}\r\n`);
   }
 
   if (settings.gstNumber) {
-    pushBytes([0x1B, 0x45, 0x01]); // Bold ON
-    pushText(`GST: ${settings.gstNumber}\n`);
-    pushBytes([0x1B, 0x45, 0x00]); // Bold OFF
+    pushBytes(0x1B, 0x45, 0x01); // Bold ON
+    pushText(`GST: ${settings.gstNumber}\r\n`);
+    pushBytes(0x1B, 0x45, 0x00); // Bold OFF
   }
 
   // Divider
-  pushText(`================================\n`);
+  pushText(`================================\r\n`);
 
-  // 3. Left Align for Bill Metadata
-  pushBytes([0x1B, 0x61, 0x00]); // Left Align
-  pushBytes([0x1B, 0x45, 0x01]); // Bold
-  pushText(`Bill No: #${bill.billNumber}\n`);
-  pushBytes([0x1B, 0x45, 0x00]);
-  pushText(`Date: ${bill.date}  ${bill.time || ''}\n`);
+  // 3. Left Align for Bill Metadata (ESC a 0)
+  pushBytes(0x1B, 0x61, 0x00);
+  pushBytes(0x1B, 0x45, 0x01); // Bold ON
+  pushText(`Bill No: #${bill.billNumber}\r\n`);
+  pushBytes(0x1B, 0x45, 0x00); // Bold OFF
+  pushText(`Date: ${bill.date}  ${bill.time || ''}\r\n`);
   if (bill.hotelName) {
-    pushText(`Hotel: ${bill.hotelName}\n`);
+    pushText(`Hotel: ${bill.hotelName}\r\n`);
   }
-  pushText(`--------------------------------\n`);
+  pushText(`--------------------------------\r\n`);
 
   // Table header
-  pushBytes([0x1B, 0x45, 0x01]);
-  pushText(`ITEM               QTY    AMOUNT\n`);
-  pushBytes([0x1B, 0x45, 0x00]);
-  pushText(`--------------------------------\n`);
+  pushBytes(0x1B, 0x45, 0x01);
+  pushText(`ITEM               QTY    AMOUNT\r\n`);
+  pushBytes(0x1B, 0x45, 0x00);
+  pushText(`--------------------------------\r\n`);
 
-  // 4. Item List - Clearly formatted with Name, Qty, Rate, and Amount
+  // 4. Item List - Clean Name & Numbers
   bill.items.forEach((item, index) => {
-    const rawName = (language === 'ta' && item.productNameTa ? item.productNameTa : (item.productNameEn || item.productName)) || 'Chicken';
+    const rawName = item.productNameEn || item.productName || 'Chicken';
+    const cleanName = rawName.replace(/[^\x20-\x7E]/g, '').trim() || 'Chicken';
+    
     // Item Name in Bold
-    pushBytes([0x1B, 0x45, 0x01]);
-    pushText(`${index + 1}. ${rawName}\n`);
-    pushBytes([0x1B, 0x45, 0x00]);
+    pushBytes(0x1B, 0x45, 0x01);
+    pushText(`${index + 1}. ${cleanName}\r\n`);
+    pushBytes(0x1B, 0x45, 0x00);
 
-    // Quantity, Rate and Amount line
+    // Quantity & Amount line
     const qtyStr = `   ${item.kg.toFixed(2)} kg x Rs.${item.pricePerKg}`;
     const amtStr = `Rs.${Math.round(item.amount)}`;
     const spaces = Math.max(1, 32 - qtyStr.length - amtStr.length);
-    pushText(`${qtyStr}${' '.repeat(spaces)}${amtStr}\n`);
+    pushText(`${qtyStr}${' '.repeat(spaces)}${amtStr}\r\n`);
   });
 
-  pushText(`--------------------------------\n`);
+  pushText(`--------------------------------\r\n`);
 
   // 5. Total Weight
-  pushBytes([0x1B, 0x21, 0x10]); // Double Height
-  pushText(`TOTAL KG : ${bill.totalKg.toFixed(3)} KG\n`);
-  pushBytes([0x1B, 0x21, 0x00]); // Reset to normal
+  pushBytes(0x1B, 0x45, 0x01); // Bold ON
+  pushText(`TOTAL WEIGHT : ${bill.totalKg.toFixed(3)} KG\r\n`);
+  pushBytes(0x1B, 0x45, 0x00);
 
-  pushText(`--------------------------------\n`);
+  pushText(`--------------------------------\r\n`);
 
-  // 6. GRAND TOTAL in BIG SIZE (Double Width + Double Height + Bold: ESC ! 0x38)
-  pushBytes([0x1B, 0x21, 0x38]); // BIG SIZE
-  pushText(`TOTAL: Rs. ${Math.round(bill.totalAmount)}\n`);
-  pushBytes([0x1B, 0x21, 0x00]); // Reset to normal size
+  // 6. GRAND TOTAL in BIG SIZE (Double Width + Double Height: GS ! 0x11 or ESC ! 0x30)
+  pushBytes(0x1B, 0x45, 0x01); // Bold ON
+  pushBytes(0x1D, 0x21, 0x11); // GS ! 0x11 (2x width + 2x height)
+  pushText(`TOTAL: Rs. ${Math.round(bill.totalAmount)}\r\n`);
+  pushBytes(0x1D, 0x21, 0x00); // Reset character size
+  pushBytes(0x1B, 0x21, 0x00); // Reset font
+  pushBytes(0x1B, 0x45, 0x00); // Bold OFF
 
-  pushText(`================================\n`);
+  pushText(`================================\r\n`);
 
-  // 7. Footer (Center Align)
-  pushBytes([0x1B, 0x61, 0x01]); // Center
+  // 7. Footer (Center Align: ESC a 1)
+  pushBytes(0x1B, 0x61, 0x01);
   if (settings.upiId) {
-    pushText(`UPI: ${settings.upiId}\n`);
+    pushText(`UPI: ${settings.upiId}\r\n`);
   }
-  pushBytes([0x1B, 0x45, 0x01]);
-  pushText(`*** THANK YOU! VISIT AGAIN ***\n`);
-  pushBytes([0x1B, 0x45, 0x00]);
+  pushBytes(0x1B, 0x45, 0x01);
+  pushText(`*** THANK YOU! VISIT AGAIN ***\r\n`);
+  pushBytes(0x1B, 0x45, 0x00);
 
-  // Feed lines for manual tear off (no GS V cutter command to prevent mini printer freeze)
-  pushText(`\n\n\n\n\n`);
+  // Feed 4 blank lines for clean tear off
+  pushText(`\r\n\r\n\r\n\r\n`);
 
   return new Uint8Array(buffer);
 }
@@ -216,17 +227,23 @@ export interface BluetoothPrintResult {
 }
 
 /**
- * Send bytes safely to Bluetooth LE printer with 20-byte MTU chunking and pacing
+ * Send bytes safely to Bluetooth LE printer with strict 20-byte MTU chunking,
+ * reliable characteristic selection, and paced write execution.
  */
 async function sendBytesToCharacteristic(characteristic: any, data: Uint8Array): Promise<void> {
   const CHUNK_SIZE = 20;
-  const DELAY_MS = 35; // 35ms pacing to let thermal head and MCU buffer process
+  const DELAY_MS = 45; // 45ms pacing for microcontrollers to prevent UART buffer drops
+
+  const canWriteWithoutResp = Boolean(characteristic.properties?.writeWithoutResponse);
+  const canWriteWithResp = Boolean(characteristic.properties?.write);
 
   for (let i = 0; i < data.length; i += CHUNK_SIZE) {
     const chunk = data.slice(i, i + CHUNK_SIZE);
     
     try {
-      if (characteristic.writeValueWithResponse) {
+      if (canWriteWithoutResp && characteristic.writeValueWithoutResponse) {
+        await characteristic.writeValueWithoutResponse(chunk);
+      } else if (canWriteWithResp && characteristic.writeValueWithResponse) {
         await characteristic.writeValueWithResponse(chunk);
       } else if (characteristic.writeValue) {
         await characteristic.writeValue(chunk);
@@ -234,18 +251,17 @@ async function sendBytesToCharacteristic(characteristic: any, data: Uint8Array):
         await characteristic.writeValueWithoutResponse(chunk);
       }
     } catch (err) {
+      // Fallback try with generic write
       try {
-        if (characteristic.writeValueWithoutResponse) {
-          await characteristic.writeValueWithoutResponse(chunk);
-        } else if (characteristic.writeValue) {
+        if (characteristic.writeValue) {
           await characteristic.writeValue(chunk);
         }
       } catch (innerErr) {
-        console.warn('Chunk write retry warning:', innerErr);
+        console.warn('GATT write error:', innerErr);
       }
     }
 
-    // Pacing delay between chunks
+    // Pacing delay between chunks to let thermal head burn and buffer drain
     await new Promise((resolve) => setTimeout(resolve, DELAY_MS));
   }
 }
@@ -295,7 +311,7 @@ export async function printBillViaBluetooth(
       try {
         const characteristics = await service.getCharacteristics();
         for (const char of characteristics) {
-          if (char.properties.write || char.properties.writeWithoutResponse) {
+          if (char.properties.writeWithoutResponse || char.properties.write) {
             writableChar = char;
             break;
           }
@@ -316,7 +332,7 @@ export async function printBillViaBluetooth(
     return {
       success: true,
       message: language === 'ta'
-        ? `பில் #${bill.billNumber} புளூடூத் பிரிண்டரில் அச்சிடப்பட்டது!`
+        ? `பில் #${bill.billNumber} புளூடூத் பிரிண்டரில் வெற்றிகரமாக அச்சிடப்பட்டது!`
         : `Bill #${bill.billNumber} printed successfully on ${device.name || 'Bluetooth printer'}!`,
     };
   } catch (error: any) {
@@ -328,5 +344,6 @@ export async function printBillViaBluetooth(
     };
   }
 }
+
 
 

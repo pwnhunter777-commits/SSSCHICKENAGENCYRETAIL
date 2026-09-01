@@ -14,6 +14,15 @@
 }
 
 @media print {
+  @page {
+    size: 17cm 7cm;
+    margin: 0;
+  }
+  body {
+    margin: 0;
+    padding: 0;
+    background: #fff;
+  }
   body * {
     visibility: hidden;
   }
@@ -21,11 +30,18 @@
     visibility: visible;
   }
   #printable-receipt {
-    position: absolute;
+    position: fixed;
     left: 0;
     top: 0;
-    width: 100%;
-    margin: 0;
-    padding: 10px;
+    width: 17cm !important;
+    height: 7cm !important;
+    max-width: 17cm !important;
+    max-height: 7cm !important;
+    margin: 0 !important;
+    padding: 0.25cm !important;
+    box-sizing: border-box !important;
+    border: none !important;
+    box-shadow: none !important;
   }
 }
+
