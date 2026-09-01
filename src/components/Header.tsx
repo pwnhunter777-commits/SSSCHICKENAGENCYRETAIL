@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Globe, Calendar, Store, Lock, Download } from 'lucide-react';
+import { Globe, Calendar, Store, Download } from 'lucide-react';
 import { Language, ShopSettings } from '../types';
 import { LANGUAGES, TRANSLATIONS } from '../utils/translations';
 import { formatDisplayDate } from '../utils/storage';
@@ -8,7 +8,6 @@ interface HeaderProps {
   settings: ShopSettings;
   currentLanguage: Language;
   onLanguageChange: (lang: Language) => void;
-  onLockClick?: () => void;
   onInstallClick?: () => void;
 }
 
@@ -16,7 +15,6 @@ export const Header: React.FC<HeaderProps> = ({
   settings,
   currentLanguage,
   onLanguageChange,
-  onLockClick,
   onInstallClick,
 }) => {
   const [showLangMenu, setShowLangMenu] = useState(false);
@@ -28,14 +26,9 @@ export const Header: React.FC<HeaderProps> = ({
   return (
     <header className="bg-emerald-800 text-white rounded-b-3xl shadow-lg px-4 pt-3 pb-4 sticky top-0 z-30 transition-all">
       <div className="flex items-center justify-between gap-2">
-        {/* Company Name & Chicken Mascot Logo (Clicking Logo locks/prompts PWD) */}
+        {/* Company Name & Chicken Mascot Logo */}
         <div className="flex items-center gap-2.5 min-w-0">
-          <button
-            type="button"
-            onClick={onLockClick}
-            title={t.lockAppNow || 'Security PIN / PWD Lock'}
-            className="w-10 h-10 rounded-full bg-white border-2 border-emerald-300 flex items-center justify-center shrink-0 overflow-hidden shadow-sm hover:scale-105 active:scale-95 transition-all cursor-pointer relative group"
-          >
+          <div className="w-10 h-10 rounded-full bg-white border-2 border-emerald-300 flex items-center justify-center shrink-0 overflow-hidden shadow-sm">
             {!imgError ? (
               <img
                 src={logoSrc}
@@ -46,13 +39,10 @@ export const Header: React.FC<HeaderProps> = ({
             ) : (
               <Store className="w-5 h-5 text-emerald-800" />
             )}
-            <div className="absolute inset-0 bg-black/30 rounded-full opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-              <Lock className="w-3.5 h-3.5 text-white drop-shadow" />
-            </div>
-          </button>
+          </div>
           <div className="truncate">
             <h1 className="text-lg sm:text-xl font-black tracking-tight text-white leading-tight truncate">
-              {settings.shopName || 'Fresh Chicken Center'}
+              {settings.shopName || 'SSS CHICKEN AGENCY'}
             </h1>
             <div className="flex items-center gap-1 text-[11px] text-emerald-100 font-medium">
               <Calendar className="w-3 h-3 shrink-0" />
@@ -61,7 +51,7 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
         </div>
 
-        {/* Action Controls: Install App, Lock button & Language Selector */}
+        {/* Action Controls: Install App & Language Selector */}
         <div className="relative shrink-0 flex items-center gap-1.5">
           {/* Quick Install PWA Button */}
           {onInstallClick && (
@@ -72,18 +62,6 @@ export const Header: React.FC<HeaderProps> = ({
               className="p-1.5 rounded-full bg-emerald-900/80 hover:bg-emerald-950 text-emerald-200 hover:text-white border border-emerald-600/70 active:scale-95 transition-all"
             >
               <Download className="w-3.5 h-3.5" />
-            </button>
-          )}
-
-          {/* Quick Lock Button */}
-          {onLockClick && (
-            <button
-              type="button"
-              onClick={onLockClick}
-              title={t.lockAppNow}
-              className="p-1.5 rounded-full bg-emerald-900/80 hover:bg-emerald-950 text-emerald-200 hover:text-white border border-emerald-600/70 active:scale-95 transition-all"
-            >
-              <Lock className="w-3.5 h-3.5" />
             </button>
           )}
 

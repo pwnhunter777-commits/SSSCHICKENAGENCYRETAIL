@@ -12,7 +12,6 @@ import { Bill, ShopSettings, Language } from '../types';
 import { TRANSLATIONS } from '../utils/translations';
 import { loadBills, deleteBillById, formatDisplayDate } from '../utils/storage';
 import { ReceiptModal } from '../components/ReceiptModal';
-import { PinPromptModal } from '../components/PinPromptModal';
 
 interface RegisterPageProps {
   settings: ShopSettings;
@@ -29,8 +28,6 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({
   const [selectedDateFilter, setSelectedDateFilter] = useState<string>('all');
   const [selectedBillForReprint, setSelectedBillForReprint] = useState<Bill | null>(null);
   const [deleteConfirmBillId, setDeleteConfirmBillId] = useState<string | null>(null);
-  const [showPinModal, setShowPinModal] = useState(false);
-  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // Load bills on mount
@@ -47,7 +44,7 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({
     return Array.from(datesSet).sort().reverse();
   }, [bills]);
 
-  // Filter bills based on search query (Bill Number or Hotel Name) and date
+  // Filter bills based on search query (Bill Number or Items) and date
   const filteredBills = useMemo(() => {
     return bills.filter((b) => {
       // Date filter
@@ -79,12 +76,7 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({
   }, [filteredBills]);
 
   const initiateDelete = (id: string) => {
-    if (settings.pinProtectionEnabled && settings.protectBillDelete) {
-      setPendingDeleteId(id);
-      setShowPinModal(true);
-    } else {
-      setDeleteConfirmBillId(id);
-    }
+    setDeleteConfirmBillId(id);
   };
 
   const handleDeleteBill = (id: string) => {
@@ -94,6 +86,7 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({
     setToastMessage(t.billDeleted);
     setTimeout(() => setToastMessage(null), 2500);
   };
+
 
   return (
     <div className="pb-24 pt-3 px-4 max-w-md mx-auto min-h-screen">
@@ -280,28 +273,6 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({
             </div>
           ))}
         </div>
-      )}
-
-      {/* Security PIN Check Modal before Deleting Bill */}
-      {showPinModal && (
-        <PinPromptModal
-          isOpen={showPinModal}
-          title={t.deleteBill}
-          subtitle={t.confirmDeleteBill}
-          settings={settings}
-          language={language}
-          onSuccess={() => {
-            setShowPinModal(false);
-            if (pendingDeleteId) {
-              setDeleteConfirmBillId(pendingDeleteId);
-              setPendingDeleteId(null);
-            }
-          }}
-          onCancel={() => {
-            setShowPinModal(false);
-            setPendingDeleteId(null);
-          }}
-        />
       )}
 
       {/* Delete Bill Confirmation Modal */}
