@@ -38,10 +38,11 @@
     max-width: 17cm !important;
     max-height: 7cm !important;
     margin: 0 !important;
-    padding: 0.25cm !important;
+    padding: 0.2cm !important;
     box-sizing: border-box !important;
-    border: none !important;
+    border: 2.5px solid #000 !important;
     box-shadow: none !important;
+    border-radius: 0 !important;
   }
 }
 

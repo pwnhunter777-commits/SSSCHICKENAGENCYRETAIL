@@ -56,7 +56,7 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/70 backdrop-blur-xs animate-in fade-in overflow-y-auto">
-      <div className="bg-white w-full max-w-3xl rounded-3xl shadow-2xl border border-slate-200 flex flex-col max-h-[95vh] overflow-hidden animate-in zoom-in-95 my-auto">
+      <div className="bg-white w-full max-w-5xl rounded-3xl shadow-2xl border border-slate-200 flex flex-col max-h-[96vh] overflow-hidden animate-in zoom-in-95 my-auto">
         {/* Modal Header */}
         <div className="bg-[#0f3d2e] text-white px-5 py-3.5 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2.5">
@@ -68,7 +68,7 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
                 Bill #{bill.billNumber}
               </h3>
               <span className="text-[11px] text-emerald-300 font-semibold">
-                {bill.date} {bill.time || ''} • 17cm × 7cm
+                {bill.date} {bill.time || ''} • 17cm × 7cm Box Bill
               </span>
             </div>
           </div>
@@ -76,29 +76,28 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-emerald-800/80 hover:bg-emerald-800 flex items-center justify-center text-white active:scale-95 transition-all ml-2"
+            className="w-8 h-8 rounded-full bg-emerald-800/80 hover:bg-emerald-800 flex items-center justify-center text-white active:scale-95 transition-all ml-2 cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
-        {/* Modal Body - 17cm Width × 7cm Height Bill View */}
-        <div className="p-3 sm:p-6 overflow-y-auto bg-slate-100/70 flex-1 flex flex-col items-center justify-center">
-          <div className="w-full flex flex-col items-center max-w-2xl">
-            {/* Sized container with 17:7 aspect ratio */}
+        {/* Modal Body - 17cm Width × 7cm Height Big Box View */}
+        <div className="p-3 sm:p-6 overflow-y-auto bg-slate-100/80 flex-1 flex flex-col items-center justify-center">
+          <div className="w-full flex flex-col items-center max-w-4xl lg:max-w-5xl">
+            {/* The Full Bill in a Big Box */}
             <div
               id="printable-receipt"
-              className="w-full bg-white rounded-2xl shadow-md border border-slate-200 overflow-hidden relative"
+              className="w-full bg-white rounded-xl sm:rounded-2xl shadow-xl border-2 sm:border-[3px] border-black overflow-hidden relative"
               style={{
                 aspectRatio: '17 / 7',
-                maxWidth: '17cm',
                 width: '100%',
               }}
             >
               <div className="w-full h-full flex flex-col p-[2.2%] text-slate-900 justify-between select-none">
-                {/* Top Header: Shop Name & Details */}
-                <div className="flex items-center justify-center gap-2.5 pt-[0.2%] pb-[0.8%] border-b border-slate-100">
-                  <div className="w-[clamp(26px,3.8vw,44px)] h-[clamp(26px,3.8vw,44px)] rounded-xl bg-white border-2 border-emerald-500 overflow-hidden shrink-0 shadow-xs flex items-center justify-center">
+                {/* Top Header Box: Shop Name & Details */}
+                <div className="flex items-center justify-center gap-2.5 sm:gap-3.5 pt-[0.2%] pb-[0.8%] border-b-2 border-black/80">
+                  <div className="w-[clamp(28px,4vw,52px)] h-[clamp(28px,4vw,52px)] rounded-xl bg-white border-2 border-emerald-600 overflow-hidden shrink-0 shadow-xs flex items-center justify-center">
                     <img
                       src={settings.logoUrl || '/logo.png'}
                       alt="Logo"
@@ -109,37 +108,37 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
                     />
                   </div>
                   <div className="text-center min-w-0 flex-1 px-1">
-                    <h1 className="text-[clamp(14px,2.4vw,28px)] font-black tracking-wide uppercase text-slate-900 leading-tight">
+                    <h1 className="text-[clamp(15px,2.8vw,34px)] font-black tracking-wide uppercase text-slate-950 leading-tight">
                       {settings.shopName || 'SSS CHICKEN AGENCY'}
                     </h1>
                     {settings.address && (
-                      <p className="text-[clamp(7.5px,1.05vw,12px)] text-slate-600 font-bold leading-tight mt-[0.2%] uppercase">
+                      <p className="text-[clamp(8px,1.2vw,14px)] text-slate-700 font-bold leading-tight mt-[0.2%] uppercase">
                         {settings.address}
                       </p>
                     )}
-                    <div className="flex items-center justify-center flex-wrap gap-x-2 text-[clamp(7.5px,0.95vw,11.5px)] text-slate-600 font-bold mt-[0.2%]">
+                    <div className="flex items-center justify-center flex-wrap gap-x-3 text-[clamp(8px,1.1vw,13px)] text-slate-800 font-bold mt-[0.2%]">
                       {settings.phoneNumber && <span>Ph: {settings.phoneNumber}</span>}
-                      {settings.gstNumber && <span className="text-emerald-800">GST: {settings.gstNumber}</span>}
+                      {settings.gstNumber && <span className="text-emerald-900">GST: {settings.gstNumber}</span>}
                       <span>Bill #{bill.billNumber}</span>
                       <span>{bill.date} {bill.time || ''}</span>
                     </div>
                   </div>
                 </div>
 
-                {/* Main Grid: Left Side Items List + Right Side Big Total Amount */}
-                <div className="grid grid-cols-12 gap-[2.5%] flex-1 items-stretch py-[1%]">
-                  {/* Left: Green Item List Box with clear items & details */}
-                  <div className="col-span-6 bg-[#48bb17] rounded-[14px] sm:rounded-[18px] p-[3%] flex flex-col justify-between text-slate-900 shadow-sm overflow-hidden">
+                {/* Main Grid: Left Box (Items List) + Right Box (Big Total Amount) */}
+                <div className="grid grid-cols-12 gap-[2%] flex-1 items-stretch py-[1%]">
+                  {/* Left Box: Green Item List Box with crisp border */}
+                  <div className="col-span-6 bg-[#48bb17] rounded-[12px] sm:rounded-[16px] border-2 border-black p-[2.8%] flex flex-col justify-between text-slate-900 shadow-sm overflow-hidden">
                     <div>
-                      <h2 className="text-[clamp(12px,2vw,22px)] font-black text-[#0a2205] tracking-tight leading-none mb-[2%]">
+                      <h2 className="text-[clamp(13px,2.2vw,24px)] font-black text-[#0a2205] tracking-tight leading-none mb-[2%]">
                         {t.itemList}
                       </h2>
                       {/* Items Table */}
-                      <div className="space-y-[1.8%]">
+                      <div className="space-y-[1.6%]">
                         {bill.items.slice(0, 5).map((item, idx) => (
                           <div
                             key={idx}
-                            className="bg-white/95 backdrop-blur-xs rounded-md sm:rounded-lg px-[3%] py-[1.8%] flex items-center justify-between text-[clamp(9px,1.2vw,13.5px)] font-bold text-slate-900 shadow-2xs"
+                            className="bg-white rounded-md sm:rounded-lg px-[3%] py-[1.8%] flex items-center justify-between text-[clamp(9.5px,1.35vw,15px)] font-bold text-slate-900 shadow-2xs border border-emerald-800/20"
                           >
                             <span className="truncate max-w-[42%] font-extrabold">
                               {item.productName}
@@ -150,13 +149,13 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
                             <span className="text-slate-600 font-semibold">
                               ₹{item.pricePerKg}
                             </span>
-                            <span className="font-black text-emerald-950 text-[clamp(9.5px,1.3vw,14.5px)]">
+                            <span className="font-black text-emerald-950 text-[clamp(10px,1.45vw,16px)]">
                               ₹{Math.round(item.amount)}
                             </span>
                           </div>
                         ))}
                         {bill.items.length > 5 && (
-                          <div className="text-center text-[clamp(8px,0.95vw,11.5px)] font-bold text-[#0a2205] pt-0.5">
+                          <div className="text-center text-[clamp(8px,1vw,12px)] font-bold text-[#0a2205] pt-0.5">
                             + {bill.items.length - 5} more item(s)
                           </div>
                         )}
@@ -164,50 +163,50 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
                     </div>
 
                     {/* Item count bottom hint */}
-                    <div className="text-[clamp(8px,0.9vw,11px)] font-bold text-[#0a2205] flex items-center justify-between pt-0.5 border-t border-[#389e0f]/50">
+                    <div className="text-[clamp(8.5px,1vw,12px)] font-bold text-[#0a2205] flex items-center justify-between pt-0.5 border-t border-[#389e0f]/60">
                       <span>{t.totalItems}: {bill.items.length}</span>
                       {bill.hotelName && <span>Hotel: {bill.hotelName}</span>}
                     </div>
                   </div>
 
-                  {/* Right: Big Total Amount, Total KG & Price */}
-                  <div className="col-span-6 flex flex-col justify-between py-[1%] pl-[1.5%] pr-[0.5%]">
+                  {/* Right Box: Big Total Amount, Total KG & Price with crisp border */}
+                  <div className="col-span-6 bg-slate-50/90 rounded-[12px] sm:rounded-[16px] border-2 border-black p-[2.8%] flex flex-col justify-between shadow-sm overflow-hidden">
                     {/* Top: total amount */}
                     <div>
-                      <h3 className="text-[clamp(14px,2.4vw,28px)] font-black text-slate-900 tracking-tight leading-none">
+                      <h3 className="text-[clamp(15px,2.6vw,32px)] font-black text-slate-950 tracking-tight leading-none">
                         {t.totalAmountHeader}
                       </h3>
-                      <div className="h-[2px] bg-slate-200 w-full mt-[1.5%]" />
+                      <div className="h-[2px] bg-black/80 w-full mt-[1.5%]" />
                     </div>
 
                     {/* Middle: kg : 5kg in bold display size */}
-                    <div className="flex items-baseline gap-[3%] text-slate-900 my-auto">
-                      <span className="text-[clamp(12.5px,2.2vw,24px)] font-bold text-slate-800">
+                    <div className="flex items-baseline gap-[3%] text-slate-900 my-auto bg-white/80 p-[2%] rounded-lg border border-slate-200">
+                      <span className="text-[clamp(13px,2.3vw,26px)] font-bold text-slate-800">
                         {t.kgLabel}
                       </span>
-                      <span className="text-[clamp(15.5px,2.8vw,34px)] font-black text-slate-950">
+                      <span className="text-[clamp(16px,3.1vw,38px)] font-black text-slate-950">
                         {bill.totalKg.toFixed(2)}kg
                       </span>
                     </div>
 
                     {/* Bottom: price : ₹ 1000 in BIG BOLD SIZE */}
-                    <div className="flex items-baseline gap-[3%] text-slate-900">
-                      <span className="text-[clamp(12.5px,2.2vw,24px)] font-bold text-slate-800">
+                    <div className="flex items-baseline gap-[3%] text-slate-900 bg-emerald-50/80 p-[2%] rounded-lg border border-emerald-200">
+                      <span className="text-[clamp(13px,2.3vw,26px)] font-bold text-slate-800">
                         {t.priceLabel}
                       </span>
-                      <span className="text-[clamp(17.5px,3.4vw,42px)] font-black text-emerald-800">
+                      <span className="text-[clamp(18px,3.8vw,48px)] font-black text-emerald-900">
                         ₹ {Math.round(bill.totalAmount)}
                       </span>
                     </div>
 
                     {/* Footer UPI / Thank you */}
-                    <div className="text-[clamp(7.5px,0.9vw,11.5px)] text-slate-500 font-semibold flex items-center justify-between pt-[1.5%] border-t border-slate-100">
+                    <div className="text-[clamp(8px,1vw,12px)] text-slate-600 font-semibold flex items-center justify-between pt-[1.2%] border-t border-slate-300">
                       {settings.upiId ? (
-                        <span className="truncate max-w-[65%]">UPI: {settings.upiId}</span>
+                        <span className="truncate max-w-[65%] font-bold text-slate-800">UPI: {settings.upiId}</span>
                       ) : (
-                        <span>Cash / Paid</span>
+                        <span className="font-bold text-slate-800">Cash / Paid</span>
                       )}
-                      <span className="italic font-medium text-slate-400 shrink-0 ml-1">
+                      <span className="italic font-bold text-slate-500 shrink-0 ml-1">
                         {t.thankYou}
                       </span>
                     </div>
