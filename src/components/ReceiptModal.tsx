@@ -4,7 +4,8 @@ import {
   Copy,
   Check,
   X,
-  Bluetooth,
+  Phone,
+  ListChecks,
 } from 'lucide-react';
 import { Bill, ShopSettings, Language } from '../types';
 import { TRANSLATIONS } from '../utils/translations';
@@ -55,208 +56,232 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/70 backdrop-blur-xs animate-in fade-in overflow-y-auto">
-      <div className="bg-white w-full max-w-5xl rounded-3xl shadow-2xl border border-slate-200 flex flex-col max-h-[96vh] overflow-hidden animate-in zoom-in-95 my-auto">
-        {/* Modal Header */}
-        <div className="bg-[#0f3d2e] text-white px-5 py-3.5 flex items-center justify-between shrink-0">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-emerald-700/80 flex items-center justify-center text-white">
-              <Printer className="w-4 h-4" />
-            </div>
-            <div>
-              <h3 className="font-extrabold text-base leading-tight">
-                Bill #{bill.billNumber}
-              </h3>
-              <span className="text-[11px] text-emerald-300 font-semibold">
-                {bill.date} {bill.time || ''} • 17cm × 7cm Box Bill
-              </span>
-            </div>
-          </div>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/75 backdrop-blur-xs animate-in fade-in overflow-y-auto">
+      {/* Outer Big Box Dialog Matching Design */}
+      <div className="relative w-full max-w-4xl my-auto animate-in zoom-in-95">
+        {/* Floating Close Button */}
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Close"
+          className="absolute -top-3.5 -right-2.5 z-20 w-9 h-9 rounded-full bg-slate-900 text-white hover:bg-slate-800 flex items-center justify-center shadow-lg border-2 border-white active:scale-95 transition-all cursor-pointer"
+        >
+          <X className="w-5 h-5" />
+        </button>
 
-          <button
-            type="button"
-            onClick={onClose}
-            className="w-8 h-8 rounded-full bg-emerald-800/80 hover:bg-emerald-800 flex items-center justify-center text-white active:scale-95 transition-all ml-2 cursor-pointer"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        </div>
+        {/* The Big Box Bill Container */}
+        <div className="bg-white rounded-[24px] sm:rounded-[32px] border-[3px] sm:border-[3.5px] border-black shadow-2xl p-3.5 sm:p-6 md:p-7 flex flex-col select-none">
+          {/* Printable Receipt Section */}
+          <div id="printable-receipt" className="flex flex-col w-full bg-white">
+            {/* Top Header */}
+            <div className="flex items-center gap-3 sm:gap-5 pb-2.5 sm:pb-3 border-b-2 border-[#0e4e2d]">
+              {/* Logo in rounded badge with green border */}
+              <div className="w-14 h-14 sm:w-20 sm:h-20 rounded-2xl bg-white border-2 border-emerald-600 p-1 shrink-0 flex items-center justify-center shadow-xs overflow-hidden">
+                <img
+                  src={settings.logoUrl || '/logo.png'}
+                  alt="Logo"
+                  className="w-full h-full object-contain"
+                  onError={(e) => {
+                    (e.currentTarget as HTMLElement).style.display = 'none';
+                  }}
+                />
+              </div>
 
-        {/* Modal Body - 17cm Width × 7cm Height Big Box View */}
-        <div className="p-3 sm:p-6 overflow-y-auto bg-slate-100/80 flex-1 flex flex-col items-center justify-center">
-          <div className="w-full flex flex-col items-center max-w-4xl lg:max-w-5xl">
-            {/* The Full Bill in a Big Box */}
-            <div
-              id="printable-receipt"
-              className="w-full bg-white rounded-xl sm:rounded-2xl shadow-xl border-2 sm:border-[3px] border-black overflow-hidden relative"
-              style={{
-                aspectRatio: '17 / 7',
-                width: '100%',
-              }}
-            >
-              <div className="w-full h-full flex flex-col p-[2.2%] text-slate-900 justify-between select-none">
-                {/* Top Header Box: Shop Name & Details */}
-                <div className="flex items-center justify-center gap-2.5 sm:gap-3.5 pt-[0.2%] pb-[0.8%] border-b-2 border-black/80">
-                  <div className="w-[clamp(28px,4vw,52px)] h-[clamp(28px,4vw,52px)] rounded-xl bg-white border-2 border-emerald-600 overflow-hidden shrink-0 shadow-xs flex items-center justify-center">
-                    <img
-                      src={settings.logoUrl || '/logo.png'}
-                      alt="Logo"
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        (e.currentTarget as HTMLElement).style.display = 'none';
-                      }}
-                    />
+              {/* Shop Title, Address & Meta Details */}
+              <div className="flex-1 text-center min-w-0">
+                <h1 className="text-xl sm:text-3xl md:text-4xl font-black uppercase text-slate-950 tracking-wide leading-none">
+                  {settings.shopName || 'SSS CHICKEN AGENCY'}
+                </h1>
+                {settings.address && (
+                  <p className="text-[9.5px] sm:text-xs font-black text-slate-800 uppercase tracking-tight mt-1 leading-snug">
+                    {settings.address}
+                  </p>
+                )}
+                <div className="flex items-center justify-center flex-wrap gap-x-2 sm:gap-x-3 text-[9.5px] sm:text-xs font-bold text-slate-900 mt-1">
+                  {settings.phoneNumber && (
+                    <span className="flex items-center gap-1">
+                      <Phone className="w-3 h-3 fill-emerald-600 text-emerald-600" />
+                      <span>Ph: {settings.phoneNumber}</span>
+                    </span>
+                  )}
+                  {settings.phoneNumber && <span className="text-slate-400">|</span>}
+                  {settings.gstNumber && (
+                    <>
+                      <span className="text-[#0d733a] font-black">GST: {settings.gstNumber}</span>
+                      <span className="text-slate-400">|</span>
+                    </>
+                  )}
+                  <span className="font-bold">Bill #{bill.billNumber}</span>
+                  <span className="text-slate-400">|</span>
+                  <span>{bill.date} {bill.time || ''}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Main Section: Left (item list) & Right (total amount) */}
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-3 sm:gap-4 items-stretch mt-3 sm:mt-4">
+              {/* Left Column Box: "item list" */}
+              <div className="md:col-span-7 flex flex-col justify-between border-2 border-[#0e4e2d] rounded-2xl overflow-hidden bg-white shadow-xs">
+                <div>
+                  {/* Green Header Bar */}
+                  <div className="bg-[#0e4e2d] text-white px-3 py-2 sm:px-4 sm:py-2.5 flex items-center gap-2">
+                    <ListChecks className="w-5 h-5 text-white shrink-0" />
+                    <span className="font-black text-base sm:text-xl tracking-wide lowercase">item list</span>
                   </div>
-                  <div className="text-center min-w-0 flex-1 px-1">
-                    <h1 className="text-[clamp(15px,2.8vw,34px)] font-black tracking-wide uppercase text-slate-950 leading-tight">
-                      {settings.shopName || 'SSS CHICKEN AGENCY'}
-                    </h1>
-                    {settings.address && (
-                      <p className="text-[clamp(8px,1.2vw,14px)] text-slate-700 font-bold leading-tight mt-[0.2%] uppercase">
-                        {settings.address}
-                      </p>
-                    )}
-                    <div className="flex items-center justify-center flex-wrap gap-x-3 text-[clamp(8px,1.1vw,13px)] text-slate-800 font-bold mt-[0.2%]">
-                      {settings.phoneNumber && <span>Ph: {settings.phoneNumber}</span>}
-                      {settings.gstNumber && <span className="text-emerald-900">GST: {settings.gstNumber}</span>}
-                      <span>Bill #{bill.billNumber}</span>
-                      <span>{bill.date} {bill.time || ''}</span>
-                    </div>
+
+                  {/* Column Subheader Bar */}
+                  <div className="bg-[#e2f0e7] grid grid-cols-12 px-3 py-1.5 sm:px-4 sm:py-2 text-[11px] sm:text-xs font-black text-[#0e4e2d] uppercase tracking-wider border-b border-[#c6e2d0]">
+                    <span className="col-span-5">ITEM</span>
+                    <span className="col-span-2 text-center">QTY</span>
+                    <span className="col-span-2 text-right">RATE</span>
+                    <span className="col-span-3 text-right">AMOUNT</span>
+                  </div>
+
+                  {/* Items List Rows */}
+                  <div className="divide-y divide-slate-100 px-3 sm:px-4 py-1 bg-white overflow-y-auto max-h-[190px]">
+                    {bill.items.map((item, idx) => (
+                      <div key={idx} className="grid grid-cols-12 items-center py-2 text-xs sm:text-sm">
+                        <div className="col-span-5 pr-1">
+                          <div className="font-black text-slate-900 leading-tight">
+                            {idx + 1}. {item.productName}
+                          </div>
+                          <div className="text-[10px] sm:text-xs text-slate-500 font-semibold">
+                            {item.kg.toFixed(2)} kg x Rs.{item.pricePerKg}
+                          </div>
+                        </div>
+                        <div className="col-span-2 text-center font-black text-slate-800">
+                          1
+                        </div>
+                        <div className="col-span-2 text-right font-bold text-slate-700">
+                          ₹{item.pricePerKg}
+                        </div>
+                        <div className="col-span-3 text-right font-black text-slate-950 text-sm sm:text-base">
+                          ₹{Math.round(item.amount)}
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
 
-                {/* Main Grid: Left Box (Items List) + Right Box (Big Total Amount) */}
-                <div className="grid grid-cols-12 gap-[2%] flex-1 items-stretch py-[1%]">
-                  {/* Left Box: Green Item List Box with crisp border */}
-                  <div className="col-span-6 bg-[#48bb17] rounded-[12px] sm:rounded-[16px] border-2 border-black p-[2.8%] flex flex-col justify-between text-slate-900 shadow-sm overflow-hidden">
-                    <div>
-                      <h2 className="text-[clamp(13px,2.2vw,24px)] font-black text-[#0a2205] tracking-tight leading-none mb-[2%]">
-                        {t.itemList}
-                      </h2>
-                      {/* Items Table */}
-                      <div className="space-y-[1.6%]">
-                        {bill.items.slice(0, 5).map((item, idx) => (
-                          <div
-                            key={idx}
-                            className="bg-white rounded-md sm:rounded-lg px-[3%] py-[1.8%] flex items-center justify-between text-[clamp(9.5px,1.35vw,15px)] font-bold text-slate-900 shadow-2xs border border-emerald-800/20"
-                          >
-                            <span className="truncate max-w-[42%] font-extrabold">
-                              {item.productName}
-                            </span>
-                            <span className="text-slate-800">
-                              {item.kg.toFixed(2)} kg
-                            </span>
-                            <span className="text-slate-600 font-semibold">
-                              ₹{item.pricePerKg}
-                            </span>
-                            <span className="font-black text-emerald-950 text-[clamp(10px,1.45vw,16px)]">
-                              ₹{Math.round(item.amount)}
-                            </span>
-                          </div>
-                        ))}
-                        {bill.items.length > 5 && (
-                          <div className="text-center text-[clamp(8px,1vw,12px)] font-bold text-[#0a2205] pt-0.5">
-                            + {bill.items.length - 5} more item(s)
-                          </div>
-                        )}
-                      </div>
-                    </div>
+                {/* Footer of Left Box */}
+                <div className="bg-[#e2f0e7] px-3 py-1.5 sm:px-4 sm:py-2 text-xs font-black text-[#0e4e2d] uppercase border-t border-[#c6e2d0] flex items-center justify-between">
+                  <span>TOTAL ITEMS: {bill.items.length}</span>
+                  {bill.hotelName && <span className="text-slate-700">HOTEL: {bill.hotelName}</span>}
+                </div>
+              </div>
 
-                    {/* Item count bottom hint */}
-                    <div className="text-[clamp(8.5px,1vw,12px)] font-bold text-[#0a2205] flex items-center justify-between pt-0.5 border-t border-[#389e0f]/60">
-                      <span>{t.totalItems}: {bill.items.length}</span>
-                      {bill.hotelName && <span>Hotel: {bill.hotelName}</span>}
-                    </div>
-                  </div>
+              {/* Right Column Box: "total amount" */}
+              <div className="md:col-span-5 flex flex-col justify-between border-2 border-slate-700 rounded-2xl p-3.5 sm:p-4 bg-white shadow-xs gap-2.5 sm:gap-3">
+                {/* Header Title */}
+                <h3 className="font-black text-xl sm:text-2xl text-slate-900 tracking-tight lowercase">
+                  total amount
+                </h3>
 
-                  {/* Right Box: Big Total Amount, Total KG & Price with crisp border */}
-                  <div className="col-span-6 bg-slate-50/90 rounded-[12px] sm:rounded-[16px] border-2 border-black p-[2.8%] flex flex-col justify-between shadow-sm overflow-hidden">
-                    {/* Top: total amount */}
-                    <div>
-                      <h3 className="text-[clamp(15px,2.6vw,32px)] font-black text-slate-950 tracking-tight leading-none">
-                        {t.totalAmountHeader}
-                      </h3>
-                      <div className="h-[2px] bg-black/80 w-full mt-[1.5%]" />
-                    </div>
+                {/* KG Highlight Box */}
+                <div className="bg-[#f0f9f4] border border-[#d2ecdc] rounded-xl sm:rounded-2xl p-2.5 sm:p-3 flex items-baseline justify-between">
+                  <span className="text-base sm:text-xl font-bold text-slate-900">
+                    kg :
+                  </span>
+                  <span className="text-2xl sm:text-4xl font-black text-slate-950">
+                    {bill.totalKg.toFixed(2)}kg
+                  </span>
+                </div>
 
-                    {/* Middle: kg : 5kg in bold display size */}
-                    <div className="flex items-baseline gap-[3%] text-slate-900 my-auto bg-white/80 p-[2%] rounded-lg border border-slate-200">
-                      <span className="text-[clamp(13px,2.3vw,26px)] font-bold text-slate-800">
-                        {t.kgLabel}
-                      </span>
-                      <span className="text-[clamp(16px,3.1vw,38px)] font-black text-slate-950">
-                        {bill.totalKg.toFixed(2)}kg
-                      </span>
-                    </div>
+                {/* Price Highlight Box */}
+                <div className="bg-[#f0f9f4] border border-[#d2ecdc] rounded-xl sm:rounded-2xl p-2.5 sm:p-3 flex items-baseline justify-between">
+                  <span className="text-base sm:text-xl font-bold text-slate-900">
+                    price :
+                  </span>
+                  <span className="text-3xl sm:text-5xl font-black text-[#0d733a]">
+                    ₹ {Math.round(bill.totalAmount)}
+                  </span>
+                </div>
 
-                    {/* Bottom: price : ₹ 1000 in BIG BOLD SIZE */}
-                    <div className="flex items-baseline gap-[3%] text-slate-900 bg-emerald-50/80 p-[2%] rounded-lg border border-emerald-200">
-                      <span className="text-[clamp(13px,2.3vw,26px)] font-bold text-slate-800">
-                        {t.priceLabel}
-                      </span>
-                      <span className="text-[clamp(18px,3.8vw,48px)] font-black text-emerald-900">
-                        ₹ {Math.round(bill.totalAmount)}
-                      </span>
-                    </div>
+                {/* Dashed Separator */}
+                <div className="border-t border-dashed border-slate-400 my-0.5" />
 
-                    {/* Footer UPI / Thank you */}
-                    <div className="text-[clamp(8px,1vw,12px)] text-slate-600 font-semibold flex items-center justify-between pt-[1.2%] border-t border-slate-300">
-                      {settings.upiId ? (
-                        <span className="truncate max-w-[65%] font-bold text-slate-800">UPI: {settings.upiId}</span>
-                      ) : (
-                        <span className="font-bold text-slate-800">Cash / Paid</span>
-                      )}
-                      <span className="italic font-bold text-slate-500 shrink-0 ml-1">
-                        {t.thankYou}
-                      </span>
+                {/* UPI & Store Footer */}
+                <div className="text-center space-y-0.5">
+                  {settings.upiId ? (
+                    <div className="text-[11px] sm:text-xs font-black text-slate-900 uppercase tracking-tight">
+                      UPI: {settings.upiId}
                     </div>
+                  ) : (
+                    <div className="text-[11px] sm:text-xs font-black text-slate-900 uppercase tracking-tight">
+                      Cash / Paid
+                    </div>
+                  )}
+                  <div className="text-[11px] sm:text-xs font-bold text-[#0d733a] italic">
+                    Thank You! Visit Again
                   </div>
                 </div>
               </div>
             </div>
+
+            {/* Bottom Full-Width Banner: "TOTAL : RS. XXX" with Dot Grids */}
+            <div className="bg-[#0e4e2d] rounded-2xl p-3 sm:p-4 text-white flex items-center justify-between shadow-xs mt-3 sm:mt-4">
+              {/* Left 3x4 Dot Grid */}
+              <div className="grid grid-cols-4 gap-1 sm:gap-1.5 opacity-60">
+                {[...Array(12)].map((_, i) => (
+                  <div key={i} className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-emerald-200" />
+                ))}
+              </div>
+
+              {/* Center Total Display */}
+              <div className="text-center font-black text-2xl sm:text-4xl md:text-5xl tracking-wider uppercase text-white">
+                TOTAL : RS. {Math.round(bill.totalAmount)}
+              </div>
+
+              {/* Right 3x4 Dot Grid */}
+              <div className="grid grid-cols-4 gap-1 sm:gap-1.5 opacity-60">
+                {[...Array(12)].map((_, i) => (
+                  <div key={i} className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-emerald-200" />
+                ))}
+              </div>
+            </div>
           </div>
 
+          {/* Action Status Feedback */}
           {statusMessage && (
-            <div className="mt-3.5 p-2.5 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-900 text-xs font-bold text-center animate-in fade-in flex items-center justify-center gap-1.5 max-w-md w-full">
+            <div className="mt-3 p-2.5 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-900 text-xs font-bold text-center animate-in fade-in flex items-center justify-center gap-1.5 w-full no-print">
               <Check className="w-4 h-4 text-emerald-600 shrink-0" />
               <span>{statusMessage}</span>
             </div>
           )}
-        </div>
 
-        {/* Modal Action Buttons - Primary Bluetooth Print & Secondary Print/Copy */}
-        <div className="p-4 bg-white border-t border-slate-200 flex flex-col gap-2.5 shrink-0">
-          {/* Main Primary Bluetooth Print Button */}
-          <button
-            type="button"
-            onClick={handleBluetoothPrint}
-            disabled={printing}
-            className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-black py-3 px-4 rounded-2xl flex items-center justify-center gap-2.5 shadow-md active:scale-98 transition-all disabled:opacity-50 text-sm sm:text-base cursor-pointer"
-          >
-            <Bluetooth className="w-5 h-5 text-white animate-pulse" />
-            <span>{printing ? t.connecting : t.printBluetooth}</span>
-          </button>
-
-          <div className="grid grid-cols-2 gap-2">
+          {/* Action Buttons inside the Box */}
+          <div className="grid grid-cols-2 gap-3 mt-3.5 sm:mt-4 w-full pt-1 no-print">
             <button
               type="button"
-              onClick={handleSystemPrint}
-              className="bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold py-2.5 px-3 rounded-xl flex items-center justify-center gap-1.5 text-xs transition-colors cursor-pointer"
+              onClick={handleBluetoothPrint}
+              disabled={printing}
+              className="bg-[#f1f5f9] hover:bg-slate-200 text-slate-900 font-bold py-3 px-4 rounded-2xl border border-slate-200 flex items-center justify-center gap-2 shadow-xs active:scale-98 transition-all cursor-pointer text-xs sm:text-sm disabled:opacity-50"
             >
-              <Printer className="w-3.5 h-3.5 text-slate-600" />
-              <span>{t.systemPrint}</span>
+              <Printer className="w-4 h-4 text-slate-700" />
+              <span>{printing ? t.connecting : 'Print via Bluetooth'}</span>
             </button>
             <button
               type="button"
               onClick={handleCopyReceipt}
-              className="bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold py-2.5 px-3 rounded-xl flex items-center justify-center gap-1.5 text-xs transition-colors cursor-pointer"
+              className="bg-[#f1f5f9] hover:bg-slate-200 text-slate-900 font-bold py-3 px-4 rounded-2xl border border-slate-200 flex items-center justify-center gap-2 shadow-xs active:scale-98 transition-all cursor-pointer text-xs sm:text-sm"
             >
               {copied ? (
-                <Check className="w-3.5 h-3.5 text-emerald-600" />
+                <Check className="w-4 h-4 text-emerald-600" />
               ) : (
-                <Copy className="w-3.5 h-3.5 text-slate-600" />
+                <Copy className="w-4 h-4 text-slate-700" />
               )}
-              <span>{copied ? t.copied : t.copyText}</span>
+              <span>{copied ? t.copied : 'Copy Text'}</span>
+            </button>
+          </div>
+
+          {/* System Print Secondary Option */}
+          <div className="mt-2 text-center no-print">
+            <button
+              type="button"
+              onClick={handleSystemPrint}
+              className="text-[11px] font-bold text-slate-500 hover:text-slate-800 underline cursor-pointer"
+            >
+              Print with System Dialog
             </button>
           </div>
         </div>
@@ -264,4 +289,5 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
     </div>
   );
 };
+
 
