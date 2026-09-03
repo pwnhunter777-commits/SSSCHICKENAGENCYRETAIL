@@ -271,7 +271,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
             <label className="block text-xs font-bold text-gray-700 mb-2">
               {t.printerFeedTitle || 'Bottom Paper Feed (Space after Total)'}
             </label>
-            <div className="grid grid-cols-3 gap-1.5">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
               <button
                 type="button"
                 onClick={() =>
@@ -281,28 +281,12 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                   }))
                 }
                 className={`py-2 px-2 rounded-xl border text-[11px] font-bold text-center transition-all cursor-pointer ${
-                  (formData.printerFeedLines ?? 0) === 0
+                  (formData.printerFeedLines ?? 4) === 0
                     ? 'bg-emerald-700 text-white border-emerald-700 shadow-sm'
                     : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
                 }`}
               >
-                {t.printerFeedZero || '0 (Zero Gap)'}
-              </button>
-              <button
-                type="button"
-                onClick={() =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    printerFeedLines: 1,
-                  }))
-                }
-                className={`py-2 px-2 rounded-xl border text-[11px] font-bold text-center transition-all cursor-pointer ${
-                  formData.printerFeedLines === 1
-                    ? 'bg-emerald-700 text-white border-emerald-700 shadow-sm'
-                    : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
-                }`}
-              >
-                {t.printerFeed1 || '1 Line'}
+                {t.printerFeedZero || '0 Lines'}
               </button>
               <button
                 type="button"
@@ -319,6 +303,38 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                 }`}
               >
                 {t.printerFeed2 || '2 Lines'}
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    printerFeedLines: 4,
+                  }))
+                }
+                className={`py-2 px-2 rounded-xl border text-[11px] font-bold text-center transition-all cursor-pointer ${
+                  (formData.printerFeedLines ?? 4) === 4
+                    ? 'bg-emerald-700 text-white border-emerald-700 shadow-sm'
+                    : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                }`}
+              >
+                {t.printerFeed4 || '4 Lines'}
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    printerFeedLines: 6,
+                  }))
+                }
+                className={`py-2 px-2 rounded-xl border text-[11px] font-bold text-center transition-all cursor-pointer ${
+                  formData.printerFeedLines === 6
+                    ? 'bg-emerald-700 text-white border-emerald-700 shadow-sm'
+                    : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                }`}
+              >
+                {t.printerFeed6 || '6 Lines'}
               </button>
             </div>
           </div>

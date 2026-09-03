@@ -507,29 +507,29 @@ export const BillingPage: React.FC<BillingPageProps> = ({
         ? createPortal(
             <div
               id="printable-receipt"
-              className="bg-white flex flex-col justify-between text-black select-text shadow-none font-mono"
+              className="bg-white flex flex-col justify-start text-black select-text shadow-none font-mono"
               style={{
                 width: '80mm',
                 maxWidth: '80mm',
                 boxSizing: 'border-box',
-                padding: '0.5mm 1mm',
+                padding: '0 1mm',
                 margin: '0',
               }}
             >
-              {/* TOP: Hotel Name and Phone number only (Zero extra top margin) */}
-              <div className="text-center border-b-2 border-black pb-0.5 pt-0">
-                <h1 className="text-sm font-black tracking-wider uppercase text-black leading-tight">
+              {/* TOP: Hotel Name and Phone number only (Zero top margin) */}
+              <div className="text-center border-b-2 border-black pb-0.5 pt-0 mt-0">
+                <h1 className="text-sm font-black tracking-wider uppercase text-black leading-tight mt-0 pt-0">
                   {(settings.shopName || 'HOTEL').toUpperCase()}
                 </h1>
                 {settings.phoneNumber && (
-                  <p className="text-xs font-bold text-black mt-0.5">
+                  <p className="text-xs font-bold text-black mt-0.5 mb-0.5">
                     Ph: {settings.phoneNumber}
                   </p>
                 )}
               </div>
 
               {/* MAIN BODY: Left side (Item) & Right side (Total) */}
-              <div className="flex-1 flex flex-col justify-between pt-0.5 min-h-0">
+              <div className="flex flex-col justify-start pt-0.5">
                 {/* Header Row */}
                 <div className="flex items-center justify-between border-b-2 border-black pb-0.5 mb-1 text-xs font-black uppercase tracking-wider">
                   <span>ITEM</span>
@@ -555,7 +555,7 @@ export const BillingPage: React.FC<BillingPageProps> = ({
                   ))}
                 </div>
 
-                {/* Bottom Total Row (Zero extra bottom space) */}
+                {/* Bottom Total Row */}
                 <div className="border-t-2 border-b-2 border-black py-0.5 px-1 flex items-center justify-between mt-1 shrink-0">
                   <span className="text-xs font-black uppercase tracking-wider">
                     TOTAL:
@@ -564,6 +564,18 @@ export const BillingPage: React.FC<BillingPageProps> = ({
                     Rs. {Math.round(lastPrintedBill?.totalAmount ?? totalAmount)}
                   </span>
                 </div>
+
+                {/* BOTTOM FEED SPACE: Space in bottom to prevent cutter/tear from touching TOTAL */}
+                <div
+                  className="w-full shrink-0"
+                  style={{
+                    height: `${
+                      settings.printerFeedLines !== undefined
+                        ? Math.max(16, settings.printerFeedLines * 6)
+                        : 24
+                    }mm`,
+                  }}
+                />
               </div>
             </div>,
             document.getElementById('thermal-print-portal')!

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import {
   Printer,
   Copy,
@@ -198,8 +199,8 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
           </div>
         )}
 
-        {/* Outer Presentation Card */}
-        <div className="bg-slate-200 p-2 sm:p-4 rounded-2xl shadow-2xl flex justify-center items-center overflow-auto max-w-full">
+        {/* Outer Presentation Card (Screen Only) */}
+        <div className="bg-slate-200 p-2 sm:p-4 rounded-2xl shadow-2xl flex justify-center items-center overflow-auto max-w-full no-print">
           {/* ======================================================== */}
           {/* FORMAT 1: 7cm × 17cm (Portrait Roll)                     */}
           {/* In the top: Hotel Name & Phone Number                   */}
@@ -208,7 +209,6 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
           {/* ======================================================== */}
           {orientation === 'portrait' ? (
             <div
-              id="printable-receipt"
               className="bg-white border-2 border-black flex flex-col justify-between overflow-hidden text-black select-text shadow-md font-mono"
               style={{
                 width: '80mm',
@@ -268,6 +268,18 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
                     Rs. {Math.round(bill.totalAmount)}
                   </span>
                 </div>
+
+                {/* Bottom Feed Space */}
+                <div
+                  className="w-full shrink-0"
+                  style={{
+                    height: `${
+                      settings.printerFeedLines !== undefined
+                        ? Math.max(16, settings.printerFeedLines * 6)
+                        : 24
+                    }mm`,
+                  }}
+                />
               </div>
             </div>
           ) : (
@@ -278,7 +290,6 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
             /* In the right side: The Total                            */
             /* ======================================================== */
             <div
-              id="printable-receipt"
               className="receipt-landscape bg-white border-2 border-black flex flex-col justify-between overflow-hidden text-black select-text shadow-md font-mono"
               style={{
                 width: '80mm',
@@ -392,6 +403,84 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
           </button>
         </div>
       </div>
+
+      {/* Thermal Printable Receipt Portal - rendered into body portal to eliminate screen wrappers */}
+      {typeof document !== 'undefined' && document.getElementById('thermal-print-portal')
+        ? createPortal(
+            <div
+              id="printable-receipt"
+              className="bg-white flex flex-col justify-start text-black select-text shadow-none font-mono"
+              style={{
+                width: '80mm',
+                maxWidth: '80mm',
+                boxSizing: 'border-box',
+                padding: '0 1mm',
+                margin: '0',
+              }}
+            >
+              {/* TOP: Hotel Name & Phone with zero top gap */}
+              <div className="text-center border-b-2 border-black pb-0.5 pt-0 mt-0">
+                <h1 className="text-sm font-black tracking-wider uppercase text-black leading-tight mt-0 pt-0">
+                  {displayHotelName}
+                </h1>
+                {displayPhone && (
+                  <p className="text-xs font-bold text-black mt-0.5 mb-0.5">
+                    Ph: {displayPhone}
+                  </p>
+                )}
+              </div>
+
+              {/* Items */}
+              <div className="flex flex-col justify-start pt-0.5">
+                <div className="flex items-center justify-between border-b-2 border-black pb-0.5 mb-1 text-xs font-black uppercase tracking-wider">
+                  <span>ITEM</span>
+                  <span>TOTAL</span>
+                </div>
+
+                <div className="space-y-0.5">
+                  {bill.items.map((item, idx) => (
+                    <div key={idx} className="flex items-start justify-between">
+                      <div className="text-left flex-1 pr-2">
+                        <div className="text-xs font-black text-black leading-tight">
+                          {idx + 1}. {item.productName}
+                        </div>
+                        <div className="text-[10px] font-semibold text-slate-800">
+                          {item.kg.toFixed(2)} kg x Rs.{item.pricePerKg}
+                        </div>
+                      </div>
+                      <span className="text-xs font-black text-black shrink-0">
+                        Rs. {Math.round(item.amount)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Total */}
+                <div className="border-t-2 border-b-2 border-black py-0.5 px-1 flex items-center justify-between mt-1 shrink-0">
+                  <span className="text-xs font-black uppercase tracking-wider">
+                    TOTAL:
+                  </span>
+                  <span className="text-sm font-black">
+                    Rs. {Math.round(bill.totalAmount)}
+                  </span>
+                </div>
+
+                {/* Bottom Feed Space */}
+                <div
+                  className="w-full shrink-0"
+                  style={{
+                    height: `${
+                      settings.printerFeedLines !== undefined
+                        ? Math.max(16, settings.printerFeedLines * 6)
+                        : 24
+                    }mm`,
+                  }}
+                />
+              </div>
+            </div>,
+            document.getElementById('thermal-print-portal')!
+          )
+        : null}
     </div>
   );
 };

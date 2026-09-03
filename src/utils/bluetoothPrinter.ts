@@ -10,9 +10,7 @@ export function formatBillReceiptText(bill: Bill, settings: ShopSettings, langua
   const dLine = '='.repeat(cols) + '\r\n';
 
   let receipt = '';
-  receipt += dLine;
-
-  // TOP: Hotel Name & Phone Number
+  // TOP: Hotel Name & Phone Number (Starts immediately with zero top gap)
   const hotel = (bill.hotelName || settings.shopName || 'HOTEL').toUpperCase();
   const phone = bill.hotelPhone || settings.phoneNumber || '';
 
@@ -58,8 +56,8 @@ export function formatBillReceiptText(bill: Bill, settings: ShopSettings, langua
   receipt += `${totalLeft}${' '.repeat(totalSpaces)}${totalVal}\r\n`;
   receipt += dLine;
 
-  // Zero trailing feeds by default to eliminate wasted bottom margin
-  const feedLines = settings.printerFeedLines ?? 0;
+  // Bottom feed lines to clear the tear bar / give space in the bottom
+  const feedLines = settings.printerFeedLines !== undefined ? settings.printerFeedLines : 4;
   if (feedLines > 0) {
     receipt += '\r\n'.repeat(feedLines);
   }
@@ -69,7 +67,7 @@ export function formatBillReceiptText(bill: Bill, settings: ShopSettings, langua
 /**
  * Generate binary ESC/POS command buffer for thermal receipt printers
  * Safe commands supported across 100% of 58mm & 80mm mini POS printers.
- * Eliminates top/right/bottom margins and perfectly aligns text to full paper width.
+ * Eliminates top/right margins and provides bottom feed for clean tearing.
  */
 export function generateEscPosBytes(bill: Bill, settings: ShopSettings, language: Language = 'en'): Uint8Array {
   const encoder = new TextEncoder();
@@ -99,9 +97,8 @@ export function generateEscPosBytes(bill: Bill, settings: ShopSettings, language
   const printWidthDots = cols * 12; // 48 * 12 = 576 dots (80mm) or 384 dots (58mm)
   pushBytes(0x1D, 0x57, printWidthDots & 0xFF, (printWidthDots >> 8) & 0xFF); // GS W nL nH -> Full printable width
 
-  // 2. TOP: Hotel Name and Phone Number (Center Align: ESC a 1)
+  // 2. TOP: Hotel Name and Phone Number (Center Align: ESC a 1) - Starts immediately with zero top gap
   pushBytes(0x1B, 0x61, 0x01);
-  pushText(dLine);
 
   const hotel = (bill.hotelName || settings.shopName || 'HOTEL').toUpperCase();
   const phone = bill.hotelPhone || settings.phoneNumber || '';
@@ -166,10 +163,10 @@ export function generateEscPosBytes(bill: Bill, settings: ShopSettings, language
   pushBytes(0x1B, 0x45, 0x00); // Bold OFF
   pushText(dLine);
 
-  // 8. BOTTOM: Zero extra feed by default to eliminate wasted space at the bottom & top of next bill
-  const feedLines = settings.printerFeedLines ?? 0;
+  // 8. BOTTOM: Feed lines after TOTAL to clear tear bar and give space in the bottom
+  const feedLines = settings.printerFeedLines !== undefined ? settings.printerFeedLines : 4;
   if (feedLines > 0) {
-    pushBytes(0x1B, 0x64, feedLines); // ESC d n -> Feed only if configured by user
+    pushBytes(0x1B, 0x64, feedLines); // ESC d n -> Feed lines after total
   }
 
   if (settings.printerAutoCut) {

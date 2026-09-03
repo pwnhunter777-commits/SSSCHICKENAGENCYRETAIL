@@ -21,10 +21,20 @@
   @page {
     size: 80mm auto;
     margin: 0mm !important;
+    margin-top: 0mm !important;
+    margin-bottom: 0mm !important;
+    margin-left: 0mm !important;
+    margin-right: 0mm !important;
+  }
+  @page :first {
+    margin: 0mm !important;
+    margin-top: 0mm !important;
   }
   html, body {
     margin: 0 !important;
     padding: 0 !important;
+    margin-top: 0 !important;
+    padding-top: 0 !important;
     height: auto !important;
     min-height: 0 !important;
     max-height: none !important;
@@ -42,7 +52,9 @@
     display: block !important;
     position: static !important;
     margin: 0 !important;
+    margin-top: 0 !important;
     padding: 0 !important;
+    padding-top: 0 !important;
     width: 80mm !important;
     max-width: 80mm !important;
     height: auto !important;
@@ -54,7 +66,9 @@
     display: block !important;
     position: static !important;
     margin: 0 !important;
-    padding: 0.5mm 1mm !important;
+    margin-top: 0 !important;
+    padding: 0 1mm !important;
+    padding-top: 0 !important;
     width: 80mm !important;
     max-width: 80mm !important;
     height: auto !important;
