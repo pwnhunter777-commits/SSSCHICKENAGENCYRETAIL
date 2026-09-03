@@ -25,7 +25,7 @@ export const DEFAULT_SETTINGS: ShopSettings = {
   billPrintWidth: 17,
   printerPaperWidth: '80mm',
   printerColumns: 48,
-  printerFeedLines: 4,
+  printerFeedLines: 8,
   printerAutoCut: false,
   withoutSkinOffset: 50,
   securityPin: '1234',
@@ -211,7 +211,12 @@ export function loadShopSettings(): ShopSettings {
         billPrintWidth: parsed.billPrintWidth ? Number(parsed.billPrintWidth) : 17,
         printerPaperWidth: parsed.printerPaperWidth || '80mm',
         printerColumns: parsed.printerColumns ? Number(parsed.printerColumns) : 48,
-        printerFeedLines: (parsed.printerFeedLines !== undefined && parsed.printerFeedLines > 0) ? Number(parsed.printerFeedLines) : 4,
+        printerFeedLines:
+          localStorage.getItem('printer_feed_upgraded_v3') !== 'true'
+            ? 8
+            : parsed.printerFeedLines !== undefined
+            ? Number(parsed.printerFeedLines)
+            : 8,
         printerAutoCut: parsed.printerAutoCut ?? false,
         securityPin: parsed.securityPin || '1234',
         pinProtectionEnabled: parsed.pinProtectionEnabled ?? false,
@@ -226,7 +231,9 @@ export function loadShopSettings(): ShopSettings {
             : 50,
       };
 
-      if (isOldPlaceholder) {
+      const needsUpgrade = isOldPlaceholder || localStorage.getItem('printer_feed_upgraded_v3') !== 'true';
+      if (needsUpgrade) {
+        localStorage.setItem('printer_feed_upgraded_v3', 'true');
         saveShopSettings(upgradedSettings);
       }
       return upgradedSettings;

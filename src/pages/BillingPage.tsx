@@ -570,9 +570,9 @@ export const BillingPage: React.FC<BillingPageProps> = ({
                   className="w-full shrink-0"
                   style={{
                     height: `${
-                      settings.printerFeedLines !== undefined
-                        ? Math.max(16, settings.printerFeedLines * 6)
-                        : 24
+                      (settings.printerFeedLines !== undefined
+                        ? settings.printerFeedLines
+                        : 8) * 5
                     }mm`,
                   }}
                 />

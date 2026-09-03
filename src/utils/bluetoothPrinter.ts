@@ -57,7 +57,7 @@ export function formatBillReceiptText(bill: Bill, settings: ShopSettings, langua
   receipt += dLine;
 
   // Bottom feed lines to clear the tear bar / give space in the bottom
-  const feedLines = settings.printerFeedLines !== undefined ? settings.printerFeedLines : 4;
+  const feedLines = settings.printerFeedLines !== undefined ? settings.printerFeedLines : 8;
   if (feedLines > 0) {
     receipt += '\r\n'.repeat(feedLines);
   }
@@ -164,7 +164,7 @@ export function generateEscPosBytes(bill: Bill, settings: ShopSettings, language
   pushText(dLine);
 
   // 8. BOTTOM: Feed lines after TOTAL to clear tear bar and give space in the bottom
-  const feedLines = settings.printerFeedLines !== undefined ? settings.printerFeedLines : 4;
+  const feedLines = settings.printerFeedLines !== undefined ? settings.printerFeedLines : 8;
   if (feedLines > 0) {
     pushBytes(0x1B, 0x64, feedLines); // ESC d n -> Feed lines after total
   }

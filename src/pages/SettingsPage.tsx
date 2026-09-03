@@ -271,7 +271,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
             <label className="block text-xs font-bold text-gray-700 mb-2">
               {t.printerFeedTitle || 'Bottom Paper Feed (Space after Total)'}
             </label>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-1.5">
               <button
                 type="button"
                 onClick={() =>
@@ -280,8 +280,8 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                     printerFeedLines: 0,
                   }))
                 }
-                className={`py-2 px-2 rounded-xl border text-[11px] font-bold text-center transition-all cursor-pointer ${
-                  (formData.printerFeedLines ?? 4) === 0
+                className={`py-2 px-1.5 rounded-xl border text-[11px] font-bold text-center transition-all cursor-pointer ${
+                  (formData.printerFeedLines ?? 8) === 0
                     ? 'bg-emerald-700 text-white border-emerald-700 shadow-sm'
                     : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
                 }`}
@@ -293,27 +293,11 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                 onClick={() =>
                   setFormData((prev) => ({
                     ...prev,
-                    printerFeedLines: 2,
-                  }))
-                }
-                className={`py-2 px-2 rounded-xl border text-[11px] font-bold text-center transition-all cursor-pointer ${
-                  formData.printerFeedLines === 2
-                    ? 'bg-emerald-700 text-white border-emerald-700 shadow-sm'
-                    : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
-                }`}
-              >
-                {t.printerFeed2 || '2 Lines'}
-              </button>
-              <button
-                type="button"
-                onClick={() =>
-                  setFormData((prev) => ({
-                    ...prev,
                     printerFeedLines: 4,
                   }))
                 }
-                className={`py-2 px-2 rounded-xl border text-[11px] font-bold text-center transition-all cursor-pointer ${
-                  (formData.printerFeedLines ?? 4) === 4
+                className={`py-2 px-1.5 rounded-xl border text-[11px] font-bold text-center transition-all cursor-pointer ${
+                  formData.printerFeedLines === 4
                     ? 'bg-emerald-700 text-white border-emerald-700 shadow-sm'
                     : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
                 }`}
@@ -328,13 +312,45 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                     printerFeedLines: 6,
                   }))
                 }
-                className={`py-2 px-2 rounded-xl border text-[11px] font-bold text-center transition-all cursor-pointer ${
+                className={`py-2 px-1.5 rounded-xl border text-[11px] font-bold text-center transition-all cursor-pointer ${
                   formData.printerFeedLines === 6
                     ? 'bg-emerald-700 text-white border-emerald-700 shadow-sm'
                     : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
                 }`}
               >
                 {t.printerFeed6 || '6 Lines'}
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    printerFeedLines: 8,
+                  }))
+                }
+                className={`py-2 px-1.5 rounded-xl border text-[11px] font-bold text-center transition-all cursor-pointer ${
+                  (formData.printerFeedLines ?? 8) === 8
+                    ? 'bg-emerald-700 text-white border-emerald-700 shadow-sm'
+                    : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                }`}
+              >
+                {t.printerFeed8 || '8 Lines'}
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    printerFeedLines: 10,
+                  }))
+                }
+                className={`py-2 px-1.5 rounded-xl border text-[11px] font-bold text-center transition-all cursor-pointer ${
+                  formData.printerFeedLines === 10
+                    ? 'bg-emerald-700 text-white border-emerald-700 shadow-sm'
+                    : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                }`}
+              >
+                {t.printerFeed10 || '10 Lines'}
               </button>
             </div>
           </div>
