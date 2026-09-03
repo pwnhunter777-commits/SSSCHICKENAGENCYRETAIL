@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+html {
+  font-size: 106%;
+  transition: font-size 0.15s ease;
+}
+
 @layer utilities {
   .no-scrollbar::-webkit-scrollbar {
     display: none;
