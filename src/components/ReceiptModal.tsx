@@ -4,10 +4,9 @@ import {
   Copy,
   Check,
   X,
-  Phone,
-  ListChecks,
   Edit2,
   Save,
+  RotateCcw,
 } from 'lucide-react';
 import { Bill, ShopSettings, Language } from '../types';
 import { TRANSLATIONS } from '../utils/translations';
@@ -30,6 +29,7 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
   onBillUpdated,
 }) => {
   const [bill, setBill] = useState<Bill | null>(initialBill);
+  const [orientation, setOrientation] = useState<'portrait' | 'landscape'>('portrait');
   const [printing, setPrinting] = useState(false);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -70,7 +70,20 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
   };
 
   const handleSystemPrint = () => {
+    const style = document.createElement('style');
+    style.id = 'print-page-size-style';
+    style.innerHTML =
+      orientation === 'portrait'
+        ? '@page { size: 7cm 17cm; margin: 0; }'
+        : '@page { size: 17cm 7cm; margin: 0; }';
+    document.head.appendChild(style);
+
     window.print();
+
+    setTimeout(() => {
+      const el = document.getElementById('print-page-size-style');
+      if (el) el.remove();
+    }, 1000);
   };
 
   const handleCopyReceipt = () => {
@@ -80,23 +93,43 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const displayHotelName = bill.hotelName || settings.shopName || 'HOTEL & CHICKEN AGENCY';
+  const displayHotelName = (bill.hotelName || settings.shopName || 'HOTEL').toUpperCase();
   const displayPhone = bill.hotelPhone || settings.phoneNumber;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/80 backdrop-blur-xs animate-in fade-in overflow-y-auto">
       {/* Outer Modal Frame */}
-      <div className="relative w-full max-w-4xl my-auto animate-in zoom-in-95 flex flex-col items-center">
-        {/* Top Control Bar with Badge and Close */}
-        <div className="w-full max-w-[17cm] flex items-center justify-between mb-2 px-1 text-white no-print">
-          <div className="flex items-center gap-2">
-            <span className="text-xs sm:text-sm font-black bg-emerald-700 px-3 py-1 rounded-full text-white tracking-wide border border-emerald-500">
-              17cm × 7cm Bill
-            </span>
-            <span className="text-xs text-slate-300 font-semibold">
-              Bill #{bill.billNumber}
-            </span>
+      <div className="relative w-full max-w-2xl my-auto animate-in zoom-in-95 flex flex-col items-center">
+        {/* Top Control Bar with Format Selector and Close */}
+        <div className="w-full flex items-center justify-between mb-2 px-1 text-white no-print">
+          <div className="flex items-center gap-1.5">
+            {/* 7cm x 17cm / 17cm x 7cm Toggle */}
+            <div className="inline-flex bg-slate-800 p-0.5 rounded-xl border border-slate-700 text-xs font-bold">
+              <button
+                type="button"
+                onClick={() => setOrientation('portrait')}
+                className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
+                  orientation === 'portrait'
+                    ? 'bg-emerald-600 text-white font-black shadow-xs'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                7cm × 17cm (Roll)
+              </button>
+              <button
+                type="button"
+                onClick={() => setOrientation('landscape')}
+                className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
+                  orientation === 'landscape'
+                    ? 'bg-emerald-600 text-white font-black shadow-xs'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                17cm × 7cm (Slip)
+              </button>
+            </div>
           </div>
+
           <div className="flex items-center gap-2">
             <button
               type="button"
@@ -117,9 +150,9 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
           </div>
         </div>
 
-        {/* Hotel & Phone Editor Card (Shown when user clicks Edit Hotel) */}
+        {/* Hotel & Phone Editor Card */}
         {isEditingHotel && (
-          <div className="w-full max-w-[17cm] bg-slate-900 border border-emerald-500/50 p-3 sm:p-4 rounded-2xl mb-3 text-white shadow-xl no-print animate-in slide-in-from-top-2">
+          <div className="w-full bg-slate-900 border border-emerald-500/50 p-3 sm:p-4 rounded-2xl mb-3 text-white shadow-xl no-print animate-in slide-in-from-top-2">
             <div className="text-xs font-black text-emerald-400 uppercase tracking-wider mb-2">
               Edit Hotel Name & Phone for this Bill
             </div>
@@ -168,205 +201,171 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
           </div>
         )}
 
-        {/* 17cm × 7cm Bill Outer Presentation Box */}
-        <div className="w-full max-w-[17cm] bg-white rounded-2xl shadow-2xl overflow-hidden p-2 sm:p-3">
-          {/* THE 17CM × 7CM PRINTABLE RECEIPT */}
-          <div
-            id="printable-receipt"
-            className="w-full bg-white rounded-xl border-2 border-black overflow-hidden relative flex flex-col justify-between"
-            style={{
-              aspectRatio: '17 / 7',
-              width: '100%',
-              padding: '2% 2.5% 1.8% 2.5%',
-              boxSizing: 'border-box',
-            }}
-          >
-            {/* TOP HEADER: Hotel Name & Phone Number */}
-            <div className="flex items-center gap-2 sm:gap-3 pb-[1%] border-b-2 border-black">
-              {/* Logo / Badge */}
-              <div className="w-[clamp(28px,3.8vw,46px)] h-[clamp(28px,3.8vw,46px)] rounded-xl bg-white border border-emerald-600 p-0.5 shrink-0 flex items-center justify-center overflow-hidden">
-                <img
-                  src={settings.logoUrl || '/logo.png'}
-                  alt="Logo"
-                  className="w-full h-full object-contain"
-                  onError={(e) => {
-                    (e.currentTarget as HTMLElement).style.display = 'none';
-                  }}
-                />
-              </div>
-
-              {/* Hotel Name & Phone & Metadata */}
-              <div className="flex-1 text-center min-w-0 px-1">
-                {/* Hotel Name Prominent at Top */}
-                <h1 className="text-[clamp(13px,2.2vw,24px)] font-black uppercase text-slate-950 tracking-wide leading-tight truncate">
+        {/* Outer Presentation Card */}
+        <div className="bg-slate-200 p-2 sm:p-4 rounded-2xl shadow-2xl flex justify-center items-center overflow-auto max-w-full">
+          {/* ======================================================== */}
+          {/* FORMAT 1: 7cm × 17cm (Portrait Roll)                     */}
+          {/* In the top: Hotel Name & Phone Number                   */}
+          {/* In the left side: The Item                               */}
+          {/* In the right side: The Total                            */}
+          {/* ======================================================== */}
+          {orientation === 'portrait' ? (
+            <div
+              id="printable-receipt"
+              className="bg-white border-2 border-black flex flex-col justify-between overflow-hidden text-black select-text shadow-md font-mono"
+              style={{
+                width: '7cm',
+                height: '17cm',
+                minWidth: '7cm',
+                minHeight: '17cm',
+                maxWidth: '7cm',
+                maxHeight: '17cm',
+                padding: '4mm 3.5mm',
+                boxSizing: 'border-box',
+              }}
+            >
+              {/* TOP: Hotel Name and Phone Number */}
+              <div className="text-center pb-2 border-b-2 border-black shrink-0">
+                <h1 className="text-base sm:text-lg font-black uppercase tracking-tight leading-tight text-black">
                   {displayHotelName}
                 </h1>
-                
-                {/* Secondary Shop Name attribution if bill has a specific hotel name */}
-                {bill.hotelName && settings.shopName && (
-                  <p className="text-[clamp(7.5px,1vw,11.5px)] font-bold text-slate-700 uppercase tracking-tight leading-none">
-                    Supplied by: {settings.shopName}
+                {displayPhone && (
+                  <p className="text-xs font-bold text-black mt-0.5">
+                    Ph: {displayPhone}
                   </p>
                 )}
+              </div>
 
-                {/* Phone Number & Bill Meta Row */}
-                <div className="flex items-center justify-center flex-wrap gap-x-2 sm:gap-x-3 text-[clamp(8px,1.05vw,12px)] font-bold text-slate-900 mt-[0.3%]">
-                  {displayPhone && (
-                    <span className="flex items-center gap-1 font-extrabold text-slate-950">
-                      <Phone className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-emerald-700 fill-emerald-700 shrink-0" />
-                      <span>Ph: {displayPhone}</span>
-                    </span>
-                  )}
-                  {displayPhone && <span className="text-slate-400 font-normal">|</span>}
-                  {settings.gstNumber && (
-                    <>
-                      <span className="text-[#0d733a] font-extrabold">GST: {settings.gstNumber}</span>
-                      <span className="text-slate-400 font-normal">|</span>
-                    </>
-                  )}
-                  <span className="font-extrabold">Bill #{bill.billNumber}</span>
-                  <span className="text-slate-400 font-normal">|</span>
-                  <span>{bill.date} {bill.time || ''}</span>
+              {/* MAIN BODY: Left Side (Item) & Right Side (Total) */}
+              <div className="flex-1 flex flex-col justify-between py-2 min-h-0">
+                {/* Header row: ITEM on left, TOTAL on right */}
+                <div className="flex items-center justify-between border-b-2 border-black pb-1 mb-2 text-[11px] font-black uppercase tracking-wider">
+                  <span>ITEM</span>
+                  <span>TOTAL</span>
+                </div>
+
+                {/* Items List */}
+                <div className="space-y-2.5 flex-1 overflow-y-auto">
+                  {bill.items.map((item, idx) => (
+                    <div key={idx} className="flex items-start justify-between">
+                      {/* LEFT SIDE: The Item */}
+                      <div className="text-left pr-2 flex-1">
+                        <div className="text-xs font-black text-black leading-tight">
+                          {idx + 1}. {item.productName}
+                        </div>
+                        <div className="text-[10.5px] font-semibold text-slate-800">
+                          {item.kg.toFixed(2)} kg x Rs.{item.pricePerKg}
+                        </div>
+                      </div>
+
+                      {/* RIGHT SIDE: The Item Total */}
+                      <div className="text-right text-xs font-black text-black shrink-0">
+                        Rs. {Math.round(item.amount)}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Bottom Total Banner: Left side TOTAL, Right side Grand Total */}
+                <div className="mt-2 border-t-2 border-b-2 border-black py-2 px-1 flex items-center justify-between bg-white text-black shrink-0">
+                  <span className="text-sm font-black uppercase tracking-wider">
+                    TOTAL:
+                  </span>
+                  <span className="text-base font-black">
+                    Rs. {Math.round(bill.totalAmount)}
+                  </span>
                 </div>
               </div>
-            </div>
 
-            {/* MAIN BODY: Left Side (The Item) & Right Side (The Total) */}
-            <div className="grid grid-cols-12 gap-[2%] flex-1 items-stretch pt-[1.2%] overflow-hidden">
-              {/* LEFT SIDE: The Item List Box */}
-              <div className="col-span-6 md:col-span-7 flex flex-col justify-between border-2 border-[#0e4e2d] rounded-lg sm:rounded-xl overflow-hidden bg-white shadow-2xs">
-                <div className="flex-1 flex flex-col min-h-0">
-                  {/* Green Header Bar */}
-                  <div className="bg-[#0e4e2d] text-white px-2 py-0.5 sm:px-2.5 sm:py-1 flex items-center justify-between shrink-0">
-                    <div className="flex items-center gap-1">
-                      <ListChecks className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
-                      <span className="font-black text-[clamp(9.5px,1.25vw,14px)] tracking-wide lowercase">
-                        item list
+              {/* Bottom Cut Border indicator */}
+              <div className="border-t border-dashed border-slate-400 pt-1 text-center text-[9px] text-slate-500 font-mono shrink-0">
+                --------------------------------
+              </div>
+            </div>
+          ) : (
+            /* ======================================================== */
+            /* FORMAT 2: 17cm × 7cm (Landscape Slip)                   */
+            /* In the top: Hotel Name & Phone Number                   */
+            /* In the left side: The Item                              */
+            /* In the right side: The Total                            */
+            /* ======================================================== */
+            <div
+              id="printable-receipt"
+              className="receipt-landscape bg-white border-2 border-black flex flex-col justify-between overflow-hidden text-black select-text shadow-md font-mono"
+              style={{
+                width: '17cm',
+                height: '7cm',
+                minWidth: '17cm',
+                minHeight: '7cm',
+                maxWidth: '17cm',
+                maxHeight: '7cm',
+                padding: '3mm 4mm',
+                boxSizing: 'border-box',
+              }}
+            >
+              {/* TOP: Hotel Name and Phone Number */}
+              <div className="text-center pb-1 border-b-2 border-black shrink-0">
+                <h1 className="text-base sm:text-lg font-black uppercase tracking-tight leading-tight text-black">
+                  {displayHotelName}
+                </h1>
+                {displayPhone && (
+                  <p className="text-xs font-bold text-black">
+                    Ph: {displayPhone}
+                  </p>
+                )}
+              </div>
+
+              {/* MAIN BODY: Left side (Item) & Right side (Total) */}
+              <div className="flex-1 flex flex-col justify-between pt-1.5 min-h-0">
+                {/* Header Row */}
+                <div className="flex items-center justify-between border-b-2 border-black pb-0.5 mb-1 text-[11px] font-black uppercase tracking-wider">
+                  <span>ITEM</span>
+                  <span>TOTAL</span>
+                </div>
+
+                {/* Items */}
+                <div className="space-y-1 flex-1 overflow-y-auto">
+                  {bill.items.map((item, idx) => (
+                    <div key={idx} className="flex items-center justify-between">
+                      <div className="text-left">
+                        <span className="text-xs font-black text-black">
+                          {idx + 1}. {item.productName}
+                        </span>
+                        <span className="text-[10px] font-semibold text-slate-800 ml-2">
+                          ({item.kg.toFixed(2)} kg x Rs.{item.pricePerKg})
+                        </span>
+                      </div>
+                      <span className="text-xs font-black text-black">
+                        Rs. {Math.round(item.amount)}
                       </span>
                     </div>
-                    <span className="text-[clamp(7.5px,0.95vw,11px)] font-bold text-emerald-200">
-                      Items: {bill.items.length}
-                    </span>
-                  </div>
-
-                  {/* Table Column Headers */}
-                  <div className="bg-[#e2f0e7] grid grid-cols-12 px-2 py-0.5 text-[clamp(8px,1vw,11px)] font-black text-[#0e4e2d] uppercase tracking-wider border-b border-[#c6e2d0] shrink-0">
-                    <span className="col-span-5">ITEM</span>
-                    <span className="col-span-2 text-center">QTY</span>
-                    <span className="col-span-2 text-right">RATE</span>
-                    <span className="col-span-3 text-right">AMOUNT</span>
-                  </div>
-
-                  {/* Items Rows */}
-                  <div className="divide-y divide-slate-100 px-2 py-0.5 flex-1 overflow-hidden flex flex-col justify-around">
-                    {bill.items.slice(0, 4).map((item, idx) => (
-                      <div
-                        key={idx}
-                        className="grid grid-cols-12 items-center py-[0.5%] text-[clamp(8px,1.1vw,12.5px)] font-bold leading-tight"
-                      >
-                        <div className="col-span-5 pr-0.5 truncate">
-                          <span className="font-black text-slate-950">
-                            {idx + 1}. {item.productName}
-                          </span>
-                          <div className="text-[clamp(7px,0.9vw,10px)] text-slate-500 font-semibold leading-none truncate">
-                            {item.kg.toFixed(2)} kg x Rs.{item.pricePerKg}
-                          </div>
-                        </div>
-                        <div className="col-span-2 text-center font-black text-slate-800">
-                          1
-                        </div>
-                        <div className="col-span-2 text-right font-bold text-slate-700">
-                          ₹{item.pricePerKg}
-                        </div>
-                        <div className="col-span-3 text-right font-black text-slate-950 text-[clamp(9px,1.2vw,14px)]">
-                          ₹{Math.round(item.amount)}
-                        </div>
-                      </div>
-                    ))}
-                    {bill.items.length > 4 && (
-                      <div className="text-center text-[clamp(7px,0.85vw,9.5px)] font-bold text-[#0e4e2d]">
-                        + {bill.items.length - 4} more items
-                      </div>
-                    )}
-                  </div>
+                  ))}
                 </div>
 
-                {/* Footer of Left Item Box */}
-                <div className="bg-[#e2f0e7] px-2 py-0.5 text-[clamp(7.5px,0.95vw,11px)] font-black text-[#0e4e2d] uppercase border-t border-[#c6e2d0] flex items-center justify-between shrink-0">
-                  <span>TOTAL ITEMS: {bill.items.length}</span>
-                  {bill.hotelName && (
-                    <span className="truncate max-w-[50%] font-bold text-slate-700">
-                      HOTEL: {bill.hotelName}
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              {/* RIGHT SIDE: The Total Box */}
-              <div className="col-span-6 md:col-span-5 flex flex-col justify-between border-2 border-black/80 rounded-lg sm:rounded-xl p-1.5 sm:p-2.5 bg-white shadow-2xs gap-[2%]">
-                {/* Header Title */}
-                <div className="flex items-center justify-between pb-[1%] border-b border-slate-200 shrink-0">
-                  <h3 className="font-black text-[clamp(10px,1.35vw,16px)] text-slate-950 tracking-tight lowercase">
-                    total amount
-                  </h3>
-                  <span className="text-[clamp(7.5px,0.9vw,10.5px)] font-bold text-slate-600">
-                    Cash / Paid
+                {/* Bottom Total Row */}
+                <div className="border-t-2 border-b-2 border-black py-1 px-1 flex items-center justify-between mt-1 shrink-0">
+                  <span className="text-xs font-black uppercase tracking-wider">
+                    TOTAL:
                   </span>
-                </div>
-
-                {/* KG Highlight Box */}
-                <div className="bg-[#f0f9f4] border border-[#d2ecdc] rounded-md sm:rounded-lg px-2 py-1 flex items-baseline justify-between my-auto">
-                  <span className="text-[clamp(10px,1.3vw,15px)] font-bold text-slate-800">
-                    kg :
-                  </span>
-                  <span className="text-[clamp(13px,1.9vw,22px)] font-black text-slate-950">
-                    {bill.totalKg.toFixed(2)}kg
-                  </span>
-                </div>
-
-                {/* Price Highlight Box */}
-                <div className="bg-[#f0f9f4] border border-[#d2ecdc] rounded-md sm:rounded-lg px-2 py-1 flex items-baseline justify-between my-auto">
-                  <span className="text-[clamp(10px,1.3vw,15px)] font-bold text-slate-800">
-                    price :
-                  </span>
-                  <span className="text-[clamp(15px,2.4vw,28px)] font-black text-[#0d733a]">
-                    ₹ {Math.round(bill.totalAmount)}
-                  </span>
-                </div>
-
-                {/* Bottom Total Banner */}
-                <div className="bg-[#0e4e2d] text-white rounded-md sm:rounded-lg py-1 px-2 text-center font-black text-[clamp(11px,1.55vw,18px)] tracking-wider uppercase shadow-2xs shrink-0">
-                  TOTAL : RS. {Math.round(bill.totalAmount)}
-                </div>
-
-                {/* Footer: UPI & Visit Again */}
-                <div className="flex items-center justify-between text-[clamp(7px,0.85vw,10px)] text-slate-600 font-semibold pt-[0.8%] border-t border-dashed border-slate-300 shrink-0">
-                  {settings.upiId ? (
-                    <span className="truncate max-w-[60%] font-bold text-slate-900">
-                      UPI: {settings.upiId}
-                    </span>
-                  ) : (
-                    <span className="font-bold text-slate-900">Paid Bill</span>
-                  )}
-                  <span className="italic font-bold text-[#0d733a] shrink-0 ml-1">
-                    Thank You! Visit Again
+                  <span className="text-sm font-black">
+                    Rs. {Math.round(bill.totalAmount)}
                   </span>
                 </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Action Status Feedback */}
         {statusMessage && (
-          <div className="mt-2.5 p-2 rounded-xl bg-emerald-500/20 border border-emerald-400 text-emerald-100 text-xs font-bold text-center animate-in fade-in flex items-center justify-center gap-1.5 w-full max-w-[17cm] no-print">
+          <div className="mt-2.5 p-2 rounded-xl bg-emerald-500/20 border border-emerald-400 text-emerald-100 text-xs font-bold text-center animate-in fade-in flex items-center justify-center gap-1.5 w-full no-print">
             <Check className="w-4 h-4 text-emerald-300 shrink-0" />
             <span>{statusMessage}</span>
           </div>
         )}
 
         {/* Modal Action Buttons at Bottom */}
-        <div className="w-full max-w-[17cm] grid grid-cols-2 gap-2 sm:gap-3 mt-3 no-print">
+        <div className="w-full grid grid-cols-2 gap-2 sm:gap-3 mt-3 no-print">
           <button
             type="button"
             onClick={handleBluetoothPrint}
@@ -382,11 +381,11 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
             className="bg-white hover:bg-slate-100 text-slate-900 font-black py-3 px-3 rounded-2xl border border-slate-300 flex items-center justify-center gap-2 shadow-lg active:scale-98 transition-all cursor-pointer text-xs sm:text-sm"
           >
             <Printer className="w-4 h-4 text-emerald-700" />
-            <span>Print 17cm × 7cm</span>
+            <span>Print {orientation === 'portrait' ? '7cm × 17cm' : '17cm × 7cm'}</span>
           </button>
         </div>
 
-        <div className="w-full max-w-[17cm] flex items-center justify-between mt-2 px-2 no-print">
+        <div className="w-full flex items-center justify-between mt-2 px-2 no-print">
           <button
             type="button"
             onClick={handleCopyReceipt}
@@ -412,6 +411,3 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
     </div>
   );
 };
-
-
-

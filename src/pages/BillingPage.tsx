@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import {
   Bluetooth,
+  Printer,
   RotateCcw,
   Check,
   Scale,
-  Building2,
-  Phone,
 } from 'lucide-react';
 import { Product, ShopSettings, Bill, BillItem, Language, ChickenVariant, getProductName } from '../types';
 import { TRANSLATIONS } from '../utils/translations';
@@ -19,10 +18,8 @@ import {
   saveDailyPrices,
   loadWithoutSkinOffset,
   saveWithoutSkinOffset,
-  loadHotels,
 } from '../utils/storage';
 import { printBillViaBluetooth } from '../utils/bluetoothPrinter';
-import { ReceiptModal } from '../components/ReceiptModal';
 import { ChickenCutCard, ChickenCutItemData } from '../components/ChickenCutCard';
 import { ChickenCutDropdown } from '../components/ChickenCutDropdown';
 
@@ -91,13 +88,10 @@ export const BillingPage: React.FC<BillingPageProps> = ({
     setTimeout(() => setToastMessage(null), 2500);
   };
 
-  // Saved bill for receipt modal
-  const [createdBill, setCreatedBill] = useState<Bill | null>(null);
+  // Last saved bill for receipt printing
+  const [lastPrintedBill, setLastPrintedBill] = useState<Bill | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isPrinting, setIsPrinting] = useState<boolean>(false);
-  const [hotelName, setHotelName] = useState<string>('');
-  const [hotelPhone, setHotelPhone] = useState<string>('');
-  const hotelList = loadHotels();
 
   // Load daily prices
   useEffect(() => {
@@ -270,13 +264,26 @@ export const BillingPage: React.FC<BillingPageProps> = ({
   // Clear entire bill
   const handleResetBill = () => {
     setCutItems({});
-    setHotelName('');
-    setHotelPhone('');
     setToastMessage(language === 'ta' ? 'பில் அழிக்கப்பட்டது' : 'Bill cleared');
     setTimeout(() => setToastMessage(null), 2000);
   };
 
-  // Create & Save Bill + Print via Bluetooth
+  // Helper to trigger direct thermal print (17cm x 7cm) without changing screen
+  const triggerSystemThermalPrint = () => {
+    const style = document.createElement('style');
+    style.id = 'print-page-size-style';
+    style.innerHTML = '@page { size: 17cm 7cm; margin: 0; }';
+    document.head.appendChild(style);
+
+    window.print();
+
+    setTimeout(() => {
+      const el = document.getElementById('print-page-size-style');
+      if (el) el.remove();
+    }, 1000);
+  };
+
+  // Create & Save Bill + Print (Screen DOES NOT change; bill is ALWAYS saved)
   const handleCreateAndPrintBill = async () => {
     if (activeBillItems.length === 0) {
       setToastMessage(t.noItemsInBill);
@@ -298,27 +305,56 @@ export const BillingPage: React.FC<BillingPageProps> = ({
       date: todayKey,
       time: timeFormatted,
       timestamp: now.getTime(),
-      hotelName: hotelName.trim() || undefined,
-      hotelPhone: hotelPhone.trim() || undefined,
+      hotelName: settings.shopName,
+      hotelPhone: settings.phoneNumber,
       items: activeBillItems,
       totalAmount: totalAmount,
       totalKg: totalKg,
     };
 
-    // Save to local storage
+    // 1. MUST save to storage immediately
     addBill(finalBill);
-    setCreatedBill(finalBill);
+    setLastPrintedBill(finalBill);
 
-    // Trigger Bluetooth Print
+    // 2. Trigger Print without changing screen
     setIsPrinting(true);
     try {
-      const result = await printBillViaBluetooth(finalBill, settings, language);
-      setToastMessage(result.message);
+      if (typeof navigator !== 'undefined' && (navigator as any).bluetooth) {
+        const result = await printBillViaBluetooth(finalBill, settings, language);
+        if (result.success) {
+          setToastMessage(
+            language === 'ta'
+              ? `பில் #${newBillNumber} சேமிக்கப்பட்டது & அச்சிடப்பட்டது!`
+              : `Bill #${newBillNumber} saved & printed via Bluetooth!`
+          );
+        } else {
+          // If Bluetooth was unavailable or cancelled, fallback to direct thermal print
+          triggerSystemThermalPrint();
+          setToastMessage(
+            language === 'ta'
+              ? `பில் #${newBillNumber} சேமிக்கப்பட்டது & அச்சிடப்பட்டது!`
+              : `Bill #${newBillNumber} saved & printed!`
+          );
+        }
+      } else {
+        // Direct browser/thermal printer
+        triggerSystemThermalPrint();
+        setToastMessage(
+          language === 'ta'
+            ? `பில் #${newBillNumber} சேமிக்கப்பட்டது & அச்சிடப்பட்டது!`
+            : `Bill #${newBillNumber} saved & printed!`
+        );
+      }
     } catch (e: any) {
-      setToastMessage(e?.message || (language === 'ta' ? 'புளூடூத் பிரிண்ட் கோரிக்கை அனுப்பப்பட்டது' : 'Bluetooth print requested'));
+      triggerSystemThermalPrint();
+      setToastMessage(
+        language === 'ta'
+          ? `பில் #${newBillNumber} சேமிக்கப்பட்டது & அச்சிடப்பட்டது!`
+          : `Bill #${newBillNumber} saved & printed!`
+      );
     } finally {
       setIsPrinting(false);
-      setTimeout(() => setToastMessage(null), 4000);
+      setTimeout(() => setToastMessage(null), 3500);
     }
   };
 
@@ -411,48 +447,6 @@ export const BillingPage: React.FC<BillingPageProps> = ({
           })}
       </div>
 
-      {/* Optional Hotel Name & Customer Phone Section */}
-      <div className="bg-white rounded-2xl p-3 shadow-sm border border-emerald-200 mt-2 mb-2">
-        <div className="flex items-center gap-1.5 mb-2 text-xs font-black text-emerald-900 uppercase tracking-wider">
-          <Building2 className="w-3.5 h-3.5 text-emerald-700" />
-          <span>{language === 'ta' ? 'ஹோட்டல் / வாடிக்கையாளர் விபரம் (விரும்பினால்)' : 'Hotel / Customer Details (Optional)'}</span>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-          <div>
-            <label className="text-[10px] font-bold text-slate-600 block mb-0.5">
-              {language === 'ta' ? 'ஹோட்டல் பெயர்:' : 'Hotel Name:'}
-            </label>
-            <input
-              type="text"
-              value={hotelName}
-              onChange={(e) => setHotelName(e.target.value)}
-              placeholder={language === 'ta' ? 'எ.கா. ஹோட்டல் ஆனந்த பவன்' : 'e.g. Hotel Ananda Bhavan'}
-              list="billing-hotel-suggestions"
-              className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-1.5 text-xs text-slate-900 font-semibold focus:outline-hidden focus:border-emerald-600"
-            />
-            <datalist id="billing-hotel-suggestions">
-              {hotelList.map((h, i) => (
-                <option key={i} value={h} />
-              ))}
-            </datalist>
-          </div>
-          <div>
-            <label className="text-[10px] font-bold text-slate-600 block mb-0.5">
-              {language === 'ta' ? 'தொலைபேசி எண்:' : 'Phone Number:'}
-            </label>
-            <div className="relative">
-              <input
-                type="text"
-                value={hotelPhone}
-                onChange={(e) => setHotelPhone(e.target.value)}
-                placeholder={settings.phoneNumber || '9876543210'}
-                className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-1.5 text-xs text-slate-900 font-semibold focus:outline-hidden focus:border-emerald-600"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Floating / Sticky Bill Summary & Print Controls */}
       <div className="bg-white rounded-3xl p-4 shadow-xl border-2 border-emerald-600 mt-2 mb-4">
         {/* Bill Summary Rows */}
@@ -477,7 +471,7 @@ export const BillingPage: React.FC<BillingPageProps> = ({
           </div>
         </div>
 
-        {/* Buttons: Clear & Print via Bluetooth */}
+        {/* Buttons: Clear & Print */}
         <div className="grid grid-cols-4 gap-2 mt-3">
           <button
             type="button"
@@ -495,24 +489,83 @@ export const BillingPage: React.FC<BillingPageProps> = ({
             disabled={activeBillItems.length === 0 || isPrinting}
             className="col-span-3 bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold py-3.5 px-4 rounded-2xl flex items-center justify-center gap-2 shadow-lg active:scale-98 transition-all disabled:opacity-50"
           >
-            <Bluetooth className="w-5 h-5 text-emerald-200" />
+            <Printer className="w-5 h-5 text-emerald-200" />
             <span className="text-sm">
-              {isPrinting ? t.connecting : t.saveAndPrint}
+              {isPrinting
+                ? t.connecting
+                : language === 'ta'
+                ? 'அச்சிடு & சேமி'
+                : 'Print & Save'}
             </span>
           </button>
         </div>
       </div>
 
-      {/* Receipt Modal (17cm x 7cm exact bill) */}
-      {createdBill && (
-        <ReceiptModal
-          bill={createdBill}
-          settings={settings}
-          language={language}
-          onClose={() => setCreatedBill(null)}
-          onBillUpdated={(updated) => setCreatedBill(updated)}
-        />
-      )}
+      {/* 17cm x 7cm Thermal Printable Receipt for direct system printing without screen change */}
+      <div className="invisible fixed -left-[9999px] top-0 print:visible print:left-0 print:top-0 print:block">
+        <div
+          id="printable-receipt"
+          className="receipt-landscape bg-white border-2 border-black flex flex-col justify-between overflow-hidden text-black select-text shadow-none font-mono"
+          style={{
+            width: '17cm',
+            height: '7cm',
+            maxWidth: '17cm',
+            maxHeight: '7cm',
+            boxSizing: 'border-box',
+            padding: '2.5mm 3.5mm',
+          }}
+        >
+          {/* TOP: Hotel Name and Phone number only */}
+          <div className="text-center border-b border-black pb-1">
+            <h1 className="text-sm font-black tracking-wider uppercase text-black leading-tight">
+              {(settings.shopName || 'HOTEL').toUpperCase()}
+            </h1>
+            {settings.phoneNumber && (
+              <p className="text-xs font-bold text-black">
+                Ph: {settings.phoneNumber}
+              </p>
+            )}
+          </div>
+
+          {/* MAIN BODY: Left side (Item) & Right side (Total) */}
+          <div className="flex-1 flex flex-col justify-between pt-1.5 min-h-0">
+            {/* Header Row */}
+            <div className="flex items-center justify-between border-b-2 border-black pb-0.5 mb-1 text-[11px] font-black uppercase tracking-wider">
+              <span>ITEM</span>
+              <span>TOTAL</span>
+            </div>
+
+            {/* Items */}
+            <div className="space-y-1 flex-1 overflow-y-auto">
+              {(lastPrintedBill?.items || activeBillItems).map((item, idx) => (
+                <div key={idx} className="flex items-center justify-between">
+                  <div className="text-left">
+                    <span className="text-xs font-black text-black">
+                      {idx + 1}. {item.productName}
+                    </span>
+                    <span className="text-[10px] font-semibold text-slate-800 ml-2">
+                      ({item.kg.toFixed(2)} kg x Rs.{item.pricePerKg})
+                    </span>
+                  </div>
+                  <span className="text-xs font-black text-black">
+                    Rs. {Math.round(item.amount)}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            {/* Bottom Total Row */}
+            <div className="border-t-2 border-b-2 border-black py-1 px-1 flex items-center justify-between mt-1 shrink-0">
+              <span className="text-xs font-black uppercase tracking-wider">
+                TOTAL:
+              </span>
+              <span className="text-sm font-black">
+                Rs. {Math.round(lastPrintedBill?.totalAmount ?? totalAmount)}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

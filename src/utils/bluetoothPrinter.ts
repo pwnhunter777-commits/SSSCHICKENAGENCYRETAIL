@@ -9,79 +9,55 @@ export function formatBillReceiptText(bill: Bill, settings: ShopSettings, langua
   const dLine = '================================\r\n';
 
   let receipt = '';
-  // Header (Centered where possible)
-  const shop = (settings.shopName || 'SSS CHICKEN AGENCY').toUpperCase();
-  receipt += `${shop}\r\n`;
+  receipt += dLine;
 
-  if (settings.address) {
-    const addr = settings.address.trim();
-    if (addr.length > 32) {
-      const parts = addr.split(',');
-      if (parts.length > 1) {
-        let curLine = '';
-        parts.forEach((p, idx) => {
-          const piece = p.trim() + (idx < parts.length - 1 ? ',' : '');
-          if ((curLine + ' ' + piece).trim().length <= 32) {
-            curLine = (curLine + ' ' + piece).trim();
-          } else {
-            if (curLine) receipt += `${curLine}\r\n`;
-            curLine = piece;
-          }
-        });
-        if (curLine) receipt += `${curLine}\r\n`;
-      } else {
-        receipt += `${addr.substring(0, 32)}\r\n${addr.substring(32)}\r\n`;
-      }
-    } else {
-      receipt += `${addr}\r\n`;
-    }
-  }
+  // TOP: Hotel Name & Phone Number
+  const hotel = (bill.hotelName || settings.shopName || 'HOTEL').toUpperCase();
+  const phone = bill.hotelPhone || settings.phoneNumber || '';
 
-  // Top: Hotel Name and Phone Number
-  if (bill.hotelName) {
-    receipt += `HOTEL: ${bill.hotelName.toUpperCase()}\r\n`;
-  }
-  const phone = bill.hotelPhone || settings.phoneNumber;
+  const padHotel = Math.max(0, Math.floor((32 - hotel.length) / 2));
+  receipt += `${' '.repeat(padHotel)}${hotel}\r\n`;
+
   if (phone) {
-    receipt += `Ph: ${phone}\r\n`;
-  }
-  if (settings.gstNumber) {
-    receipt += `GST: ${settings.gstNumber}\r\n`;
+    const phStr = `Ph: ${phone}`;
+    const padPh = Math.max(0, Math.floor((32 - phStr.length) / 2));
+    receipt += `${' '.repeat(padPh)}${phStr}\r\n`;
   }
   receipt += dLine;
 
-  // Bill metadata
-  receipt += `Bill No: #${bill.billNumber}\r\n`;
-  receipt += `Date: ${bill.date}  ${bill.time || ''}\r\n`;
+  // Left side: ITEM, Right side: TOTAL
+  receipt += `ITEM                       TOTAL\r\n`;
   receipt += line;
 
-  // Table header
-  receipt += `ITEM               QTY    AMOUNT\r\n`;
-  receipt += line;
-
-  // Items - 2-line layout per item
   bill.items.forEach((item, index) => {
-    // Standard ASCII name
     const rawName = item.productNameEn || item.productName || 'Chicken';
     const cleanName = rawName.replace(/[^\x20-\x7E]/g, '').trim() || 'Chicken';
-    receipt += `${index + 1}. ${cleanName}\r\n`;
-    const qtyStr = `   ${item.kg.toFixed(2)} kg x Rs.${item.pricePerKg}`;
+    const itemTitle = `${index + 1}. ${cleanName}`;
     const amtStr = `Rs.${Math.round(item.amount)}`;
-    const spaces = Math.max(1, 32 - qtyStr.length - amtStr.length);
-    receipt += `${qtyStr}${' '.repeat(spaces)}${amtStr}\r\n`;
+
+    if (itemTitle.length + amtStr.length + 1 <= 32) {
+      const spaces = 32 - itemTitle.length - amtStr.length;
+      receipt += `${itemTitle}${' '.repeat(spaces)}${amtStr}\r\n`;
+    } else {
+      receipt += `${itemTitle}\r\n`;
+      const spaces = 32 - amtStr.length;
+      receipt += `${' '.repeat(spaces)}${amtStr}\r\n`;
+    }
+    const qtyStr = `   ${item.kg.toFixed(2)} kg x Rs.${item.pricePerKg}`;
+    receipt += `${qtyStr}\r\n`;
   });
 
-  // Totals
   receipt += line;
-  receipt += `TOTAL WEIGHT :  ${bill.totalKg.toFixed(3)} KG\r\n`;
-  receipt += line;
-  receipt += `GRAND TOTAL  :  Rs. ${Math.round(bill.totalAmount)}\r\n`;
+
+  // Total: Left side TOTAL, Right side Total Amount
+  const totalLeft = 'TOTAL:';
+  const totalVal = `Rs. ${Math.round(bill.totalAmount)}`;
+  const totalSpaces = Math.max(1, 32 - totalLeft.length - totalVal.length);
+  receipt += `${totalLeft}${' '.repeat(totalSpaces)}${totalVal}\r\n`;
   receipt += dLine;
 
-  if (settings.upiId) {
-    receipt += `UPI: ${settings.upiId}\r\n`;
-  }
-  receipt += `*** THANK YOU! VISIT AGAIN ***\r\n\r\n\r\n\r\n\r\n`;
+  // 17cm slip feed
+  receipt += '\r\n\r\n\r\n\r\n\r\n';
   return receipt;
 }
 
@@ -107,122 +83,72 @@ export function generateEscPosBytes(bill: Bill, settings: ShopSettings, language
   // 1. Initialize printer (ESC @)
   pushBytes(0x1B, 0x40);
 
-  // 2. Header (Center Align: ESC a 1)
+  // 2. TOP: Hotel Name and Phone Number (Center Align: ESC a 1)
   pushBytes(0x1B, 0x61, 0x01);
+  pushText(`================================\r\n`);
 
-  // Shop Name in Bold Double-Height (ESC ! 0x10)
-  pushBytes(0x1B, 0x21, 0x10);
+  const hotel = (bill.hotelName || settings.shopName || 'HOTEL').toUpperCase();
+  const phone = bill.hotelPhone || settings.phoneNumber || '';
+
+  // Hotel Name in Double-Height Bold
+  pushBytes(0x1B, 0x21, 0x10); // Double height
   pushBytes(0x1B, 0x45, 0x01); // Bold ON
-  pushText(`${settings.shopName || 'SSS CHICKEN AGENCY'}\r\n`);
+  pushText(`${hotel}\r\n`);
   pushBytes(0x1B, 0x21, 0x00); // Normal size
   pushBytes(0x1B, 0x45, 0x00); // Bold OFF
 
-  if (settings.address) {
-    const addr = settings.address.trim();
-    if (addr.length > 32) {
-      const parts = addr.split(',');
-      if (parts.length > 1) {
-        let curLine = '';
-        parts.forEach((p, idx) => {
-          const piece = p.trim() + (idx < parts.length - 1 ? ',' : '');
-          if ((curLine + ' ' + piece).trim().length <= 32) {
-            curLine = (curLine + ' ' + piece).trim();
-          } else {
-            if (curLine) pushText(`${curLine}\r\n`);
-            curLine = piece;
-          }
-        });
-        if (curLine) pushText(`${curLine}\r\n`);
-      } else {
-        pushText(`${addr.substring(0, 32)}\r\n${addr.substring(32)}\r\n`);
-      }
-    } else {
-      pushText(`${addr}\r\n`);
-    }
-  }
-
-  // Top: Hotel Name and Phone Number
-  if (bill.hotelName) {
-    pushBytes(0x1B, 0x45, 0x01); // Bold ON
-    pushText(`HOTEL: ${bill.hotelName.toUpperCase()}\r\n`);
-    pushBytes(0x1B, 0x45, 0x00);
-  }
-
-  const phone = bill.hotelPhone || settings.phoneNumber;
   if (phone) {
-    pushText(`Ph: ${phone}\r\n`);
-  }
-
-  if (settings.gstNumber) {
     pushBytes(0x1B, 0x45, 0x01); // Bold ON
-    pushText(`GST: ${settings.gstNumber}\r\n`);
+    pushText(`Ph: ${phone}\r\n`);
     pushBytes(0x1B, 0x45, 0x00); // Bold OFF
   }
-
-  // Divider
   pushText(`================================\r\n`);
 
-  // 3. Left Align for Bill Metadata (ESC a 0)
+  // 3. TABLE HEADER: Left side ITEM, Right side TOTAL (Left Align: ESC a 0)
   pushBytes(0x1B, 0x61, 0x00);
   pushBytes(0x1B, 0x45, 0x01); // Bold ON
-  pushText(`Bill No: #${bill.billNumber}\r\n`);
+  pushText(`ITEM                       TOTAL\r\n`);
   pushBytes(0x1B, 0x45, 0x00); // Bold OFF
-  pushText(`Date: ${bill.date}  ${bill.time || ''}\r\n`);
   pushText(`--------------------------------\r\n`);
 
-  // Table header
-  pushBytes(0x1B, 0x45, 0x01);
-  pushText(`ITEM               QTY    AMOUNT\r\n`);
-  pushBytes(0x1B, 0x45, 0x00);
-  pushText(`--------------------------------\r\n`);
-
-  // 4. Item List - Clean Name & Numbers
+  // 4. ITEMS: Left side item, Right side amount
   bill.items.forEach((item, index) => {
     const rawName = item.productNameEn || item.productName || 'Chicken';
     const cleanName = rawName.replace(/[^\x20-\x7E]/g, '').trim() || 'Chicken';
-    
-    // Item Name in Bold
-    pushBytes(0x1B, 0x45, 0x01);
-    pushText(`${index + 1}. ${cleanName}\r\n`);
-    pushBytes(0x1B, 0x45, 0x00);
-
-    // Quantity & Amount line
-    const qtyStr = `   ${item.kg.toFixed(2)} kg x Rs.${item.pricePerKg}`;
+    const itemTitle = `${index + 1}. ${cleanName}`;
     const amtStr = `Rs.${Math.round(item.amount)}`;
-    const spaces = Math.max(1, 32 - qtyStr.length - amtStr.length);
-    pushText(`${qtyStr}${' '.repeat(spaces)}${amtStr}\r\n`);
+
+    pushBytes(0x1B, 0x45, 0x01); // Bold ON
+    if (itemTitle.length + amtStr.length + 1 <= 32) {
+      const spaces = 32 - itemTitle.length - amtStr.length;
+      pushText(`${itemTitle}${' '.repeat(spaces)}${amtStr}\r\n`);
+    } else {
+      pushText(`${itemTitle}\r\n`);
+      const spaces = 32 - amtStr.length;
+      pushText(`${' '.repeat(spaces)}${amtStr}\r\n`);
+    }
+    pushBytes(0x1B, 0x45, 0x00); // Bold OFF
+
+    // Quantity / Rate
+    pushText(`   ${item.kg.toFixed(2)} kg x Rs.${item.pricePerKg}\r\n`);
   });
 
   pushText(`--------------------------------\r\n`);
 
-  // 5. Total Weight
-  pushBytes(0x1B, 0x45, 0x01); // Bold ON
-  pushText(`TOTAL WEIGHT : ${bill.totalKg.toFixed(3)} KG\r\n`);
-  pushBytes(0x1B, 0x45, 0x00);
-
-  pushText(`--------------------------------\r\n`);
-
-  // 6. GRAND TOTAL in BIG SIZE (Double Width + Double Height: GS ! 0x11 or ESC ! 0x30)
+  // 5. TOTAL: Left side TOTAL, Right side Total Amount in BIG FONT
   pushBytes(0x1B, 0x45, 0x01); // Bold ON
   pushBytes(0x1D, 0x21, 0x11); // GS ! 0x11 (2x width + 2x height)
-  pushText(`TOTAL: Rs. ${Math.round(bill.totalAmount)}\r\n`);
-  pushBytes(0x1D, 0x21, 0x00); // Reset character size
-  pushBytes(0x1B, 0x21, 0x00); // Reset font
+  const totalVal = `Rs. ${Math.round(bill.totalAmount)}`;
+  const totalLeft = 'TOTAL:';
+  const spacesDouble = Math.max(1, 16 - totalLeft.length - totalVal.length);
+  pushText(`${totalLeft}${' '.repeat(spacesDouble)}${totalVal}\r\n`);
+  pushBytes(0x1D, 0x21, 0x00); // Reset font size
   pushBytes(0x1B, 0x45, 0x00); // Bold OFF
-
   pushText(`================================\r\n`);
 
-  // 7. Footer (Center Align: ESC a 1)
-  pushBytes(0x1B, 0x61, 0x01);
-  if (settings.upiId) {
-    pushText(`UPI: ${settings.upiId}\r\n`);
-  }
-  pushBytes(0x1B, 0x45, 0x01);
-  pushText(`*** THANK YOU! VISIT AGAIN ***\r\n`);
-  pushBytes(0x1B, 0x45, 0x00);
-
-  // Feed 4 blank lines for clean tear off
-  pushText(`\r\n\r\n\r\n\r\n`);
+  // 6. Feed to approx 17cm length and cut
+  pushText(`\r\n\r\n\r\n\r\n\r\n\r\n`);
+  pushBytes(0x1D, 0x56, 0x42, 0x00); // GS V 66 0 (Partial paper cut)
 
   return new Uint8Array(buffer);
 }
