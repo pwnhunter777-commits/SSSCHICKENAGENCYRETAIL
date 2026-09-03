@@ -15,8 +15,8 @@
 
 @media print {
   @page {
-    size: auto;
-    margin: 5mm;
+    size: 17cm 7cm;
+    margin: 0;
   }
   body {
     margin: 0;
@@ -32,20 +32,23 @@
     visibility: visible;
   }
   #printable-receipt {
-    position: absolute;
+    position: fixed;
     left: 0;
     top: 0;
-    width: 100% !important;
+    width: 17cm !important;
+    height: 7cm !important;
     max-width: 17cm !important;
-    margin: 0 auto !important;
-    padding: 14px !important;
+    max-height: 7cm !important;
+    margin: 0 !important;
+    padding: 2.5mm 3.5mm !important;
     box-sizing: border-box !important;
-    border: 3px solid #000 !important;
+    border: 2px solid #000 !important;
     box-shadow: none !important;
-    border-radius: 20px !important;
+    border-radius: 6px !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
     background-color: #fff !important;
+    overflow: hidden !important;
   }
   .no-print {
     display: none !important;

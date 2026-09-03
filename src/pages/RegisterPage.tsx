@@ -315,6 +315,10 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({
           settings={settings}
           language={language}
           onClose={() => setSelectedBillForReprint(null)}
+          onBillUpdated={(updated) => {
+            setSelectedBillForReprint(updated);
+            setBills(loadBills());
+          }}
         />
       )}
     </div>

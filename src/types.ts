@@ -63,6 +63,7 @@ export interface Bill {
   time: string; // HH:MM AM/PM
   timestamp: number;
   hotelName?: string;
+  hotelPhone?: string;
   items: BillItem[];
   totalAmount: number;
   totalKg: number;

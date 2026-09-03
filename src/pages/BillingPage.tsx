@@ -4,6 +4,8 @@ import {
   RotateCcw,
   Check,
   Scale,
+  Building2,
+  Phone,
 } from 'lucide-react';
 import { Product, ShopSettings, Bill, BillItem, Language, ChickenVariant, getProductName } from '../types';
 import { TRANSLATIONS } from '../utils/translations';
@@ -17,6 +19,7 @@ import {
   saveDailyPrices,
   loadWithoutSkinOffset,
   saveWithoutSkinOffset,
+  loadHotels,
 } from '../utils/storage';
 import { printBillViaBluetooth } from '../utils/bluetoothPrinter';
 import { ReceiptModal } from '../components/ReceiptModal';
@@ -92,6 +95,9 @@ export const BillingPage: React.FC<BillingPageProps> = ({
   const [createdBill, setCreatedBill] = useState<Bill | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isPrinting, setIsPrinting] = useState<boolean>(false);
+  const [hotelName, setHotelName] = useState<string>('');
+  const [hotelPhone, setHotelPhone] = useState<string>('');
+  const hotelList = loadHotels();
 
   // Load daily prices
   useEffect(() => {
@@ -264,6 +270,8 @@ export const BillingPage: React.FC<BillingPageProps> = ({
   // Clear entire bill
   const handleResetBill = () => {
     setCutItems({});
+    setHotelName('');
+    setHotelPhone('');
     setToastMessage(language === 'ta' ? 'பில் அழிக்கப்பட்டது' : 'Bill cleared');
     setTimeout(() => setToastMessage(null), 2000);
   };
@@ -290,6 +298,8 @@ export const BillingPage: React.FC<BillingPageProps> = ({
       date: todayKey,
       time: timeFormatted,
       timestamp: now.getTime(),
+      hotelName: hotelName.trim() || undefined,
+      hotelPhone: hotelPhone.trim() || undefined,
       items: activeBillItems,
       totalAmount: totalAmount,
       totalKg: totalKg,
@@ -401,6 +411,48 @@ export const BillingPage: React.FC<BillingPageProps> = ({
           })}
       </div>
 
+      {/* Optional Hotel Name & Customer Phone Section */}
+      <div className="bg-white rounded-2xl p-3 shadow-sm border border-emerald-200 mt-2 mb-2">
+        <div className="flex items-center gap-1.5 mb-2 text-xs font-black text-emerald-900 uppercase tracking-wider">
+          <Building2 className="w-3.5 h-3.5 text-emerald-700" />
+          <span>{language === 'ta' ? 'ஹோட்டல் / வாடிக்கையாளர் விபரம் (விரும்பினால்)' : 'Hotel / Customer Details (Optional)'}</span>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <div>
+            <label className="text-[10px] font-bold text-slate-600 block mb-0.5">
+              {language === 'ta' ? 'ஹோட்டல் பெயர்:' : 'Hotel Name:'}
+            </label>
+            <input
+              type="text"
+              value={hotelName}
+              onChange={(e) => setHotelName(e.target.value)}
+              placeholder={language === 'ta' ? 'எ.கா. ஹோட்டல் ஆனந்த பவன்' : 'e.g. Hotel Ananda Bhavan'}
+              list="billing-hotel-suggestions"
+              className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-1.5 text-xs text-slate-900 font-semibold focus:outline-hidden focus:border-emerald-600"
+            />
+            <datalist id="billing-hotel-suggestions">
+              {hotelList.map((h, i) => (
+                <option key={i} value={h} />
+              ))}
+            </datalist>
+          </div>
+          <div>
+            <label className="text-[10px] font-bold text-slate-600 block mb-0.5">
+              {language === 'ta' ? 'தொலைபேசி எண்:' : 'Phone Number:'}
+            </label>
+            <div className="relative">
+              <input
+                type="text"
+                value={hotelPhone}
+                onChange={(e) => setHotelPhone(e.target.value)}
+                placeholder={settings.phoneNumber || '9876543210'}
+                className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-1.5 text-xs text-slate-900 font-semibold focus:outline-hidden focus:border-emerald-600"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Floating / Sticky Bill Summary & Print Controls */}
       <div className="bg-white rounded-3xl p-4 shadow-xl border-2 border-emerald-600 mt-2 mb-4">
         {/* Bill Summary Rows */}
@@ -451,13 +503,14 @@ export const BillingPage: React.FC<BillingPageProps> = ({
         </div>
       </div>
 
-      {/* Receipt Modal (2008 x 827 px exact canvas image bill) */}
+      {/* Receipt Modal (17cm x 7cm exact bill) */}
       {createdBill && (
         <ReceiptModal
           bill={createdBill}
           settings={settings}
           language={language}
           onClose={() => setCreatedBill(null)}
+          onBillUpdated={(updated) => setCreatedBill(updated)}
         />
       )}
     </div>

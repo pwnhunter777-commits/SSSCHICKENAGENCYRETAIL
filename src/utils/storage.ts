@@ -280,6 +280,17 @@ export function addBill(bill: Bill): void {
   saveBills(bills);
 }
 
+export function updateBill(updatedBill: Bill): void {
+  const bills = loadBills();
+  const idx = bills.findIndex((b) => b.id === updatedBill.id);
+  if (idx !== -1) {
+    bills[idx] = updatedBill;
+  } else {
+    bills.unshift(updatedBill);
+  }
+  saveBills(bills);
+}
+
 export function deleteBillById(id: string): Bill[] {
   const bills = loadBills().filter((b) => b.id !== id);
   saveBills(bills);

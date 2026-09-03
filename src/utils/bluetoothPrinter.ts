@@ -37,8 +37,13 @@ export function formatBillReceiptText(bill: Bill, settings: ShopSettings, langua
     }
   }
 
-  if (settings.phoneNumber) {
-    receipt += `Ph: ${settings.phoneNumber}\r\n`;
+  // Top: Hotel Name and Phone Number
+  if (bill.hotelName) {
+    receipt += `HOTEL: ${bill.hotelName.toUpperCase()}\r\n`;
+  }
+  const phone = bill.hotelPhone || settings.phoneNumber;
+  if (phone) {
+    receipt += `Ph: ${phone}\r\n`;
   }
   if (settings.gstNumber) {
     receipt += `GST: ${settings.gstNumber}\r\n`;
@@ -48,9 +53,6 @@ export function formatBillReceiptText(bill: Bill, settings: ShopSettings, langua
   // Bill metadata
   receipt += `Bill No: #${bill.billNumber}\r\n`;
   receipt += `Date: ${bill.date}  ${bill.time || ''}\r\n`;
-  if (bill.hotelName) {
-    receipt += `Hotel: ${bill.hotelName}\r\n`;
-  }
   receipt += line;
 
   // Table header
@@ -139,8 +141,16 @@ export function generateEscPosBytes(bill: Bill, settings: ShopSettings, language
     }
   }
 
-  if (settings.phoneNumber) {
-    pushText(`Ph: ${settings.phoneNumber}\r\n`);
+  // Top: Hotel Name and Phone Number
+  if (bill.hotelName) {
+    pushBytes(0x1B, 0x45, 0x01); // Bold ON
+    pushText(`HOTEL: ${bill.hotelName.toUpperCase()}\r\n`);
+    pushBytes(0x1B, 0x45, 0x00);
+  }
+
+  const phone = bill.hotelPhone || settings.phoneNumber;
+  if (phone) {
+    pushText(`Ph: ${phone}\r\n`);
   }
 
   if (settings.gstNumber) {
@@ -158,9 +168,6 @@ export function generateEscPosBytes(bill: Bill, settings: ShopSettings, language
   pushText(`Bill No: #${bill.billNumber}\r\n`);
   pushBytes(0x1B, 0x45, 0x00); // Bold OFF
   pushText(`Date: ${bill.date}  ${bill.time || ''}\r\n`);
-  if (bill.hotelName) {
-    pushText(`Hotel: ${bill.hotelName}\r\n`);
-  }
   pushText(`--------------------------------\r\n`);
 
   // Table header
