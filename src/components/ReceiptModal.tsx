@@ -72,7 +72,7 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
   const handleSystemPrint = () => {
     const style = document.createElement('style');
     style.id = 'print-page-size-style';
-    style.innerHTML = '@page { size: auto; margin: 0; }';
+    style.innerHTML = '@page { size: 80mm auto; margin: 0mm !important; }';
     document.head.appendChild(style);
 
     window.print();
@@ -213,12 +213,12 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
               style={{
                 width: '80mm',
                 maxWidth: '80mm',
-                padding: '1mm 2mm',
+                padding: '0.5mm 1mm',
                 boxSizing: 'border-box',
               }}
             >
-              {/* TOP: Hotel Name and Phone Number (No extra top margin) */}
-              <div className="text-center pb-1 pt-0 border-b-2 border-black shrink-0">
+              {/* TOP: Hotel Name and Phone Number (Zero extra top margin) */}
+              <div className="text-center pb-0.5 pt-0 border-b-2 border-black shrink-0">
                 <h1 className="text-sm sm:text-base font-black uppercase tracking-tight leading-tight text-black">
                   {displayHotelName}
                 </h1>
@@ -230,15 +230,15 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
               </div>
 
               {/* MAIN BODY: Left Side (Item) & Right Side (Total) */}
-              <div className="flex-1 flex flex-col justify-between py-1 min-h-0">
+              <div className="flex-1 flex flex-col justify-between py-0.5 min-h-0">
                 {/* Header row: ITEM on left, TOTAL on right */}
-                <div className="flex items-center justify-between border-b-2 border-black pb-0.5 mb-1.5 text-xs font-black uppercase tracking-wider">
+                <div className="flex items-center justify-between border-b-2 border-black pb-0.5 mb-1 text-xs font-black uppercase tracking-wider">
                   <span>ITEM</span>
                   <span>TOTAL</span>
                 </div>
 
                 {/* Items List */}
-                <div className="space-y-1 flex-1 overflow-y-auto">
+                <div className="space-y-0.5 flex-1 overflow-y-auto">
                   {bill.items.map((item, idx) => (
                     <div key={idx} className="flex items-start justify-between">
                       {/* LEFT SIDE: The Item */}
@@ -260,7 +260,7 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
                 </div>
 
                 {/* Bottom Total Banner: Left side TOTAL, Right side Grand Total */}
-                <div className="mt-2 border-t-2 border-b-2 border-black py-2 px-1 flex items-center justify-between bg-white text-black shrink-0">
+                <div className="mt-1 border-t-2 border-b-2 border-black py-1 px-1 flex items-center justify-between bg-white text-black shrink-0">
                   <span className="text-sm font-black uppercase tracking-wider">
                     TOTAL:
                   </span>
@@ -268,11 +268,6 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
                     Rs. {Math.round(bill.totalAmount)}
                   </span>
                 </div>
-              </div>
-
-              {/* Bottom Cut Border indicator */}
-              <div className="border-t border-dashed border-slate-400 pt-1 text-center text-[9px] text-slate-500 font-mono shrink-0">
-                --------------------------------
               </div>
             </div>
           ) : (
@@ -288,7 +283,7 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
               style={{
                 width: '80mm',
                 maxWidth: '80mm',
-                padding: '1mm 2mm',
+                padding: '0.5mm 1mm',
                 boxSizing: 'border-box',
               }}
             >

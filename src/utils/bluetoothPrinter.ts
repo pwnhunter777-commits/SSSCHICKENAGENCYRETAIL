@@ -58,8 +58,11 @@ export function formatBillReceiptText(bill: Bill, settings: ShopSettings, langua
   receipt += `${totalLeft}${' '.repeat(totalSpaces)}${totalVal}\r\n`;
   receipt += dLine;
 
-  // Single clean line break to avoid wasted bottom margin
-  receipt += '\r\n';
+  // Zero trailing feeds by default to eliminate wasted bottom margin
+  const feedLines = settings.printerFeedLines ?? 0;
+  if (feedLines > 0) {
+    receipt += '\r\n'.repeat(feedLines);
+  }
   return receipt;
 }
 
@@ -87,18 +90,16 @@ export function generateEscPosBytes(bill: Bill, settings: ShopSettings, language
   const line = '-'.repeat(cols) + '\r\n';
   const dLine = '='.repeat(cols) + '\r\n';
 
-  // 1. Initialize printer (ESC @)
-  pushBytes(0x1B, 0x40);
-
-  // 2. Set compact line spacing to eliminate top/inner vertical gaps (ESC 3 24 = 24 dots)
-  pushBytes(0x1B, 0x33, 24);
-
-  // 3. Set left margin to 0 and full printable width
+  // 1. Configure ultra-compact line spacing & zero margin without hardware form-feed
+  // (We do NOT send ESC @ because many POS firmware feed 1-3 lines upon reset)
+  pushBytes(0x1B, 0x33, 16); // ESC 3 16 -> 16-dot ultra compact line spacing
+  pushBytes(0x1B, 0x21, 0x00); // Standard character size
+  pushBytes(0x1B, 0x45, 0x00); // Bold OFF
   pushBytes(0x1D, 0x4C, 0x00, 0x00); // GS L 0 0 -> Left margin 0
-  const printWidthDots = cols * 12; // 48 * 12 = 576 dots
-  pushBytes(0x1D, 0x57, printWidthDots & 0xFF, (printWidthDots >> 8) & 0xFF); // GS W nL nH
+  const printWidthDots = cols * 12; // 48 * 12 = 576 dots (80mm) or 384 dots (58mm)
+  pushBytes(0x1D, 0x57, printWidthDots & 0xFF, (printWidthDots >> 8) & 0xFF); // GS W nL nH -> Full printable width
 
-  // 4. TOP: Hotel Name and Phone Number (Center Align: ESC a 1)
+  // 2. TOP: Hotel Name and Phone Number (Center Align: ESC a 1)
   pushBytes(0x1B, 0x61, 0x01);
   pushText(dLine);
 
@@ -165,9 +166,16 @@ export function generateEscPosBytes(bill: Bill, settings: ShopSettings, language
   pushBytes(0x1B, 0x45, 0x00); // Bold OFF
   pushText(dLine);
 
-  // 8. Minimal feed to bring receipt just past the cutter bar (eliminates wasted bottom paper)
-  pushBytes(0x1B, 0x64, 0x02); // ESC d 2 -> Feed only 2 lines
-  pushBytes(0x1D, 0x56, 0x42, 0x00); // GS V 66 0 (Partial paper cut)
+  // 8. BOTTOM: Zero extra feed by default to eliminate wasted space at the bottom & top of next bill
+  const feedLines = settings.printerFeedLines ?? 0;
+  if (feedLines > 0) {
+    pushBytes(0x1B, 0x64, feedLines); // ESC d n -> Feed only if configured by user
+  }
+
+  if (settings.printerAutoCut) {
+    // Immediate cut without feed
+    pushBytes(0x1D, 0x56, 0x01); // GS V 1 (Partial cut)
+  }
 
   return new Uint8Array(buffer);
 }

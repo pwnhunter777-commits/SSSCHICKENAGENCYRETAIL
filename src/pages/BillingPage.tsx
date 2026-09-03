@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import {
   Bluetooth,
   Printer,
@@ -272,7 +273,7 @@ export const BillingPage: React.FC<BillingPageProps> = ({
   const triggerSystemThermalPrint = () => {
     const style = document.createElement('style');
     style.id = 'print-page-size-style';
-    style.innerHTML = '@page { size: auto; margin: 0; }';
+    style.innerHTML = '@page { size: 80mm auto; margin: 0mm !important; }';
     document.head.appendChild(style);
 
     window.print();
@@ -501,70 +502,73 @@ export const BillingPage: React.FC<BillingPageProps> = ({
         </div>
       </div>
 
-      {/* Thermal Printable Receipt for direct system printing without screen change */}
-      <div className="invisible fixed -left-[9999px] top-0 print:visible print:left-0 print:top-0 print:block">
-        <div
-          id="printable-receipt"
-          className="bg-white flex flex-col justify-between text-black select-text shadow-none font-mono"
-          style={{
-            width: '80mm',
-            maxWidth: '80mm',
-            boxSizing: 'border-box',
-            padding: '1mm 2mm',
-            margin: '0',
-          }}
-        >
-          {/* TOP: Hotel Name and Phone number only (Zero extra top margin) */}
-          <div className="text-center border-b-2 border-black pb-1 pt-0">
-            <h1 className="text-sm font-black tracking-wider uppercase text-black leading-tight">
-              {(settings.shopName || 'HOTEL').toUpperCase()}
-            </h1>
-            {settings.phoneNumber && (
-              <p className="text-xs font-bold text-black mt-0.5">
-                Ph: {settings.phoneNumber}
-              </p>
-            )}
-          </div>
+      {/* Thermal Printable Receipt Portal - rendered directly into body to eliminate document 100vh height */}
+      {typeof document !== 'undefined' && document.getElementById('thermal-print-portal')
+        ? createPortal(
+            <div
+              id="printable-receipt"
+              className="bg-white flex flex-col justify-between text-black select-text shadow-none font-mono"
+              style={{
+                width: '80mm',
+                maxWidth: '80mm',
+                boxSizing: 'border-box',
+                padding: '0.5mm 1mm',
+                margin: '0',
+              }}
+            >
+              {/* TOP: Hotel Name and Phone number only (Zero extra top margin) */}
+              <div className="text-center border-b-2 border-black pb-0.5 pt-0">
+                <h1 className="text-sm font-black tracking-wider uppercase text-black leading-tight">
+                  {(settings.shopName || 'HOTEL').toUpperCase()}
+                </h1>
+                {settings.phoneNumber && (
+                  <p className="text-xs font-bold text-black mt-0.5">
+                    Ph: {settings.phoneNumber}
+                  </p>
+                )}
+              </div>
 
-          {/* MAIN BODY: Left side (Item) & Right side (Total) */}
-          <div className="flex-1 flex flex-col justify-between pt-1 min-h-0">
-            {/* Header Row */}
-            <div className="flex items-center justify-between border-b-2 border-black pb-0.5 mb-1 text-xs font-black uppercase tracking-wider">
-              <span>ITEM</span>
-              <span>TOTAL</span>
-            </div>
+              {/* MAIN BODY: Left side (Item) & Right side (Total) */}
+              <div className="flex-1 flex flex-col justify-between pt-0.5 min-h-0">
+                {/* Header Row */}
+                <div className="flex items-center justify-between border-b-2 border-black pb-0.5 mb-1 text-xs font-black uppercase tracking-wider">
+                  <span>ITEM</span>
+                  <span>TOTAL</span>
+                </div>
 
-            {/* Items */}
-            <div className="space-y-1">
-              {(lastPrintedBill?.items || activeBillItems).map((item, idx) => (
-                <div key={idx} className="flex items-start justify-between">
-                  <div className="text-left flex-1 pr-2">
-                    <div className="text-xs font-black text-black leading-tight">
-                      {idx + 1}. {item.productName}
+                {/* Items */}
+                <div className="space-y-0.5">
+                  {(lastPrintedBill?.items || activeBillItems).map((item, idx) => (
+                    <div key={idx} className="flex items-start justify-between">
+                      <div className="text-left flex-1 pr-2">
+                        <div className="text-xs font-black text-black leading-tight">
+                          {idx + 1}. {item.productName}
+                        </div>
+                        <div className="text-[10px] font-semibold text-slate-800">
+                          {item.kg.toFixed(2)} kg x Rs.{item.pricePerKg}
+                        </div>
+                      </div>
+                      <span className="text-xs font-black text-black shrink-0">
+                        Rs. {Math.round(item.amount)}
+                      </span>
                     </div>
-                    <div className="text-[10px] font-semibold text-slate-800">
-                      {item.kg.toFixed(2)} kg x Rs.{item.pricePerKg}
-                    </div>
-                  </div>
-                  <span className="text-xs font-black text-black shrink-0">
-                    Rs. {Math.round(item.amount)}
+                  ))}
+                </div>
+
+                {/* Bottom Total Row (Zero extra bottom space) */}
+                <div className="border-t-2 border-b-2 border-black py-0.5 px-1 flex items-center justify-between mt-1 shrink-0">
+                  <span className="text-xs font-black uppercase tracking-wider">
+                    TOTAL:
+                  </span>
+                  <span className="text-sm font-black">
+                    Rs. {Math.round(lastPrintedBill?.totalAmount ?? totalAmount)}
                   </span>
                 </div>
-              ))}
-            </div>
-
-            {/* Bottom Total Row (Zero extra bottom space) */}
-            <div className="border-t-2 border-b-2 border-black py-1 px-1 flex items-center justify-between mt-1 shrink-0">
-              <span className="text-xs font-black uppercase tracking-wider">
-                TOTAL:
-              </span>
-              <span className="text-sm font-black">
-                Rs. {Math.round(lastPrintedBill?.totalAmount ?? totalAmount)}
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
+              </div>
+            </div>,
+            document.getElementById('thermal-print-portal')!
+          )
+        : null}
     </div>
   );
 };

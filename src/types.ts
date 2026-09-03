@@ -43,6 +43,8 @@ export interface ShopSettings {
   billPrintWidth?: number; // Bill Print Width in cm (default 17)
   printerPaperWidth?: '80mm' | '58mm'; // Thermal paper roll width (80mm default, 58mm)
   printerColumns?: number; // 48 for 80mm (default), 32 for 58mm
+  printerFeedLines?: number; // Extra line feeds at bottom (default 0 for zero gap)
+  printerAutoCut?: boolean; // Send cut command (default false for manual tear / no feed)
 }
 
 export interface BillItem {

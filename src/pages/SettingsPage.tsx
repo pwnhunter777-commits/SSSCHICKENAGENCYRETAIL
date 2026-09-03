@@ -265,6 +265,104 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
               </button>
             </div>
           </div>
+
+          {/* Bottom Paper Feed / Space after total */}
+          <div className="pt-2 border-t border-slate-100">
+            <label className="block text-xs font-bold text-gray-700 mb-2">
+              {t.printerFeedTitle || 'Bottom Paper Feed (Space after Total)'}
+            </label>
+            <div className="grid grid-cols-3 gap-1.5">
+              <button
+                type="button"
+                onClick={() =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    printerFeedLines: 0,
+                  }))
+                }
+                className={`py-2 px-2 rounded-xl border text-[11px] font-bold text-center transition-all cursor-pointer ${
+                  (formData.printerFeedLines ?? 0) === 0
+                    ? 'bg-emerald-700 text-white border-emerald-700 shadow-sm'
+                    : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                }`}
+              >
+                {t.printerFeedZero || '0 (Zero Gap)'}
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    printerFeedLines: 1,
+                  }))
+                }
+                className={`py-2 px-2 rounded-xl border text-[11px] font-bold text-center transition-all cursor-pointer ${
+                  formData.printerFeedLines === 1
+                    ? 'bg-emerald-700 text-white border-emerald-700 shadow-sm'
+                    : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                }`}
+              >
+                {t.printerFeed1 || '1 Line'}
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    printerFeedLines: 2,
+                  }))
+                }
+                className={`py-2 px-2 rounded-xl border text-[11px] font-bold text-center transition-all cursor-pointer ${
+                  formData.printerFeedLines === 2
+                    ? 'bg-emerald-700 text-white border-emerald-700 shadow-sm'
+                    : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                }`}
+              >
+                {t.printerFeed2 || '2 Lines'}
+              </button>
+            </div>
+          </div>
+
+          {/* Paper Cut Mode */}
+          <div className="pt-2 border-t border-slate-100">
+            <label className="block text-xs font-bold text-gray-700 mb-2">
+              {t.printerCutTitle || 'Paper Cut Mode'}
+            </label>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    printerAutoCut: false,
+                  }))
+                }
+                className={`py-2 px-3 rounded-xl border text-xs font-bold text-center transition-all cursor-pointer ${
+                  !formData.printerAutoCut
+                    ? 'bg-emerald-700 text-white border-emerald-700 shadow-sm'
+                    : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                }`}
+              >
+                {t.printerCutManual || 'Manual Tear (Zero Feed)'}
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    printerAutoCut: true,
+                  }))
+                }
+                className={`py-2 px-3 rounded-xl border text-xs font-bold text-center transition-all cursor-pointer ${
+                  formData.printerAutoCut
+                    ? 'bg-emerald-700 text-white border-emerald-700 shadow-sm'
+                    : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                }`}
+              >
+                {t.printerCutAuto || 'Auto Cut'}
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* 7. Without Skin Rate Increase */}
