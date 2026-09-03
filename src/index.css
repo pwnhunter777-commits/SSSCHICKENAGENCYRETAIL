@@ -35,27 +35,18 @@
     position: fixed;
     left: 0;
     top: 0;
-    width: 7cm !important;
-    height: 17cm !important;
-    max-width: 7cm !important;
-    max-height: 17cm !important;
+    width: 80mm !important;
+    max-width: 80mm !important;
     margin: 0 !important;
-    padding: 3mm 3mm !important;
+    padding: 1mm 2mm !important;
     box-sizing: border-box !important;
-    border: 2px solid #000 !important;
+    border: none !important;
     box-shadow: none !important;
     border-radius: 0 !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
     background-color: #fff !important;
-    overflow: hidden !important;
-  }
-  #printable-receipt.receipt-landscape {
-    width: 17cm !important;
-    height: 7cm !important;
-    max-width: 17cm !important;
-    max-height: 7cm !important;
-    padding: 2.5mm 3.5mm !important;
+    overflow: visible !important;
   }
   .no-print {
     display: none !important;

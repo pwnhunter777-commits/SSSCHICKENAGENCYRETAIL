@@ -41,6 +41,8 @@ export interface ShopSettings {
   protectAppLock?: boolean; // require PIN on startup / manual lock
   logoUrl?: string; // custom logo url or default /logo.png
   billPrintWidth?: number; // Bill Print Width in cm (default 17)
+  printerPaperWidth?: '80mm' | '58mm'; // Thermal paper roll width (80mm default, 58mm)
+  printerColumns?: number; // 48 for 80mm (default), 32 for 58mm
 }
 
 export interface BillItem {

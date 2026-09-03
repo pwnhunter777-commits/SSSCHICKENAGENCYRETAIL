@@ -72,10 +72,7 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
   const handleSystemPrint = () => {
     const style = document.createElement('style');
     style.id = 'print-page-size-style';
-    style.innerHTML =
-      orientation === 'portrait'
-        ? '@page { size: 7cm 17cm; margin: 0; }'
-        : '@page { size: 17cm 7cm; margin: 0; }';
+    style.innerHTML = '@page { size: auto; margin: 0; }';
     document.head.appendChild(style);
 
     window.print();
@@ -214,19 +211,15 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
               id="printable-receipt"
               className="bg-white border-2 border-black flex flex-col justify-between overflow-hidden text-black select-text shadow-md font-mono"
               style={{
-                width: '7cm',
-                height: '17cm',
-                minWidth: '7cm',
-                minHeight: '17cm',
-                maxWidth: '7cm',
-                maxHeight: '17cm',
-                padding: '4mm 3.5mm',
+                width: '80mm',
+                maxWidth: '80mm',
+                padding: '1mm 2mm',
                 boxSizing: 'border-box',
               }}
             >
-              {/* TOP: Hotel Name and Phone Number */}
-              <div className="text-center pb-2 border-b-2 border-black shrink-0">
-                <h1 className="text-base sm:text-lg font-black uppercase tracking-tight leading-tight text-black">
+              {/* TOP: Hotel Name and Phone Number (No extra top margin) */}
+              <div className="text-center pb-1 pt-0 border-b-2 border-black shrink-0">
+                <h1 className="text-sm sm:text-base font-black uppercase tracking-tight leading-tight text-black">
                   {displayHotelName}
                 </h1>
                 {displayPhone && (
@@ -237,15 +230,15 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
               </div>
 
               {/* MAIN BODY: Left Side (Item) & Right Side (Total) */}
-              <div className="flex-1 flex flex-col justify-between py-2 min-h-0">
+              <div className="flex-1 flex flex-col justify-between py-1 min-h-0">
                 {/* Header row: ITEM on left, TOTAL on right */}
-                <div className="flex items-center justify-between border-b-2 border-black pb-1 mb-2 text-[11px] font-black uppercase tracking-wider">
+                <div className="flex items-center justify-between border-b-2 border-black pb-0.5 mb-1.5 text-xs font-black uppercase tracking-wider">
                   <span>ITEM</span>
                   <span>TOTAL</span>
                 </div>
 
                 {/* Items List */}
-                <div className="space-y-2.5 flex-1 overflow-y-auto">
+                <div className="space-y-1 flex-1 overflow-y-auto">
                   {bill.items.map((item, idx) => (
                     <div key={idx} className="flex items-start justify-between">
                       {/* LEFT SIDE: The Item */}
@@ -293,23 +286,19 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
               id="printable-receipt"
               className="receipt-landscape bg-white border-2 border-black flex flex-col justify-between overflow-hidden text-black select-text shadow-md font-mono"
               style={{
-                width: '17cm',
-                height: '7cm',
-                minWidth: '17cm',
-                minHeight: '7cm',
-                maxWidth: '17cm',
-                maxHeight: '7cm',
-                padding: '3mm 4mm',
+                width: '80mm',
+                maxWidth: '80mm',
+                padding: '1mm 2mm',
                 boxSizing: 'border-box',
               }}
             >
-              {/* TOP: Hotel Name and Phone Number */}
-              <div className="text-center pb-1 border-b-2 border-black shrink-0">
-                <h1 className="text-base sm:text-lg font-black uppercase tracking-tight leading-tight text-black">
+              {/* TOP: Hotel Name and Phone Number (No extra top margin) */}
+              <div className="text-center pb-1 pt-0 border-b-2 border-black shrink-0">
+                <h1 className="text-sm sm:text-base font-black uppercase tracking-tight leading-tight text-black">
                   {displayHotelName}
                 </h1>
                 {displayPhone && (
-                  <p className="text-xs font-bold text-black">
+                  <p className="text-xs font-bold text-black mt-0.5">
                     Ph: {displayPhone}
                   </p>
                 )}

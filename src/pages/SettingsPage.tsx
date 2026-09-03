@@ -195,31 +195,75 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
           />
         </div>
 
-        {/* 6. Bill Print Width */}
-        <div className="bg-white rounded-2xl p-3.5 shadow-sm border border-emerald-100 focus-within:border-emerald-600 transition-all">
-          <label className="flex items-center gap-1.5 text-xs font-bold text-gray-700 mb-1.5">
-            <Printer className="w-4 h-4 text-emerald-700" />
-            <span>6. {t.billPrintWidth || 'Bill Print Width'}</span>
-          </label>
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-2">
-              <input
-                type="number"
-                min="5"
-                max="50"
-                value={formData.billPrintWidth || 17}
-                onChange={(e) =>
-                  handleChange('billPrintWidth', parseInt(e.target.value) || 17)
-                }
-                className="w-24 bg-emerald-50/40 border-2 border-emerald-200 focus:border-emerald-600 focus:bg-white text-gray-900 font-black text-center text-sm py-2 px-2 rounded-xl outline-none transition-all"
-              />
-              <span className="text-xs font-bold text-emerald-900">
-                {t.billPrintWidthUnit || 'cm (செ.மீ)'}
+        {/* 6. Bill Print Width & Thermal Roll Size */}
+        <div className="bg-white rounded-2xl p-3.5 shadow-sm border border-emerald-100 focus-within:border-emerald-600 transition-all space-y-3">
+          <div>
+            <label className="flex items-center gap-1.5 text-xs font-bold text-gray-700 mb-1.5">
+              <Printer className="w-4 h-4 text-emerald-700" />
+              <span>6. {t.billPrintWidth || 'Bill Print Width'}</span>
+            </label>
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <input
+                  type="number"
+                  min="5"
+                  max="50"
+                  value={formData.billPrintWidth || 17}
+                  onChange={(e) =>
+                    handleChange('billPrintWidth', parseInt(e.target.value) || 17)
+                  }
+                  className="w-24 bg-emerald-50/40 border-2 border-emerald-200 focus:border-emerald-600 focus:bg-white text-gray-900 font-black text-center text-sm py-2 px-2 rounded-xl outline-none transition-all"
+                />
+                <span className="text-xs font-bold text-emerald-900">
+                  {t.billPrintWidthUnit || 'cm (செ.மீ)'}
+                </span>
+              </div>
+              <span className="text-xs text-slate-500 italic">
+                {t.defaultPrintWidth || 'Default: 17 cm'}
               </span>
             </div>
-            <span className="text-xs text-slate-500 italic">
-              {t.defaultPrintWidth || 'Default: 17 cm'}
-            </span>
+          </div>
+
+          <div className="pt-2 border-t border-slate-100">
+            <label className="block text-xs font-bold text-gray-700 mb-2">
+              {t.thermalPaperWidth || 'Thermal Printer Paper Size'}
+            </label>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    printerPaperWidth: '80mm',
+                    printerColumns: 48,
+                  }))
+                }
+                className={`py-2 px-3 rounded-xl border text-xs font-bold text-center transition-all cursor-pointer ${
+                  (formData.printerPaperWidth ?? '80mm') === '80mm'
+                    ? 'bg-emerald-700 text-white border-emerald-700 shadow-sm'
+                    : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                }`}
+              >
+                {t.thermalPaper80mm || '80mm Roll (48 Columns)'}
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    printerPaperWidth: '58mm',
+                    printerColumns: 32,
+                  }))
+                }
+                className={`py-2 px-3 rounded-xl border text-xs font-bold text-center transition-all cursor-pointer ${
+                  formData.printerPaperWidth === '58mm'
+                    ? 'bg-emerald-700 text-white border-emerald-700 shadow-sm'
+                    : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                }`}
+              >
+                {t.thermalPaper58mm || '58mm Roll (32 Columns)'}
+              </button>
+            </div>
           </div>
         </div>
 

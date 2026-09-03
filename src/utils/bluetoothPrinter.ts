@@ -1,12 +1,13 @@
 import { Bill, ShopSettings, Language } from '../types';
 
 /**
- * Format plain text receipt with clean 32-column alignment for 58mm / 80mm thermal printers
+ * Format plain text receipt with clean column alignment for 80mm (48 cols) / 58mm (32 cols) thermal printers
  * Uses strictly standard ASCII characters and CRLF line breaks to ensure 100% printer compatibility.
  */
 export function formatBillReceiptText(bill: Bill, settings: ShopSettings, language: Language = 'en'): string {
-  const line = '--------------------------------\r\n';
-  const dLine = '================================\r\n';
+  const cols = settings.printerColumns || (settings.printerPaperWidth === '58mm' ? 32 : 48);
+  const line = '-'.repeat(cols) + '\r\n';
+  const dLine = '='.repeat(cols) + '\r\n';
 
   let receipt = '';
   receipt += dLine;
@@ -15,18 +16,19 @@ export function formatBillReceiptText(bill: Bill, settings: ShopSettings, langua
   const hotel = (bill.hotelName || settings.shopName || 'HOTEL').toUpperCase();
   const phone = bill.hotelPhone || settings.phoneNumber || '';
 
-  const padHotel = Math.max(0, Math.floor((32 - hotel.length) / 2));
+  const padHotel = Math.max(0, Math.floor((cols - hotel.length) / 2));
   receipt += `${' '.repeat(padHotel)}${hotel}\r\n`;
 
   if (phone) {
     const phStr = `Ph: ${phone}`;
-    const padPh = Math.max(0, Math.floor((32 - phStr.length) / 2));
+    const padPh = Math.max(0, Math.floor((cols - phStr.length) / 2));
     receipt += `${' '.repeat(padPh)}${phStr}\r\n`;
   }
   receipt += dLine;
 
-  // Left side: ITEM, Right side: TOTAL
-  receipt += `ITEM                       TOTAL\r\n`;
+  // Left side: ITEM, Right side: TOTAL (flush to the far right edge)
+  const headerSpaces = Math.max(1, cols - 4 - 5);
+  receipt += `ITEM${' '.repeat(headerSpaces)}TOTAL\r\n`;
   receipt += line;
 
   bill.items.forEach((item, index) => {
@@ -35,12 +37,12 @@ export function formatBillReceiptText(bill: Bill, settings: ShopSettings, langua
     const itemTitle = `${index + 1}. ${cleanName}`;
     const amtStr = `Rs.${Math.round(item.amount)}`;
 
-    if (itemTitle.length + amtStr.length + 1 <= 32) {
-      const spaces = 32 - itemTitle.length - amtStr.length;
+    if (itemTitle.length + amtStr.length + 1 <= cols) {
+      const spaces = cols - itemTitle.length - amtStr.length;
       receipt += `${itemTitle}${' '.repeat(spaces)}${amtStr}\r\n`;
     } else {
       receipt += `${itemTitle}\r\n`;
-      const spaces = 32 - amtStr.length;
+      const spaces = Math.max(1, cols - amtStr.length);
       receipt += `${' '.repeat(spaces)}${amtStr}\r\n`;
     }
     const qtyStr = `   ${item.kg.toFixed(2)} kg x Rs.${item.pricePerKg}`;
@@ -49,25 +51,27 @@ export function formatBillReceiptText(bill: Bill, settings: ShopSettings, langua
 
   receipt += line;
 
-  // Total: Left side TOTAL, Right side Total Amount
+  // Total: Left side TOTAL, Right side Total Amount (flush right)
   const totalLeft = 'TOTAL:';
   const totalVal = `Rs. ${Math.round(bill.totalAmount)}`;
-  const totalSpaces = Math.max(1, 32 - totalLeft.length - totalVal.length);
+  const totalSpaces = Math.max(1, cols - totalLeft.length - totalVal.length);
   receipt += `${totalLeft}${' '.repeat(totalSpaces)}${totalVal}\r\n`;
   receipt += dLine;
 
-  // 17cm slip feed
-  receipt += '\r\n\r\n\r\n\r\n\r\n';
+  // Single clean line break to avoid wasted bottom margin
+  receipt += '\r\n';
   return receipt;
 }
 
 /**
  * Generate binary ESC/POS command buffer for thermal receipt printers
  * Safe commands supported across 100% of 58mm & 80mm mini POS printers.
+ * Eliminates top/right/bottom margins and perfectly aligns text to full paper width.
  */
 export function generateEscPosBytes(bill: Bill, settings: ShopSettings, language: Language = 'en'): Uint8Array {
   const encoder = new TextEncoder();
   const buffer: number[] = [];
+  const cols = settings.printerColumns || (settings.printerPaperWidth === '58mm' ? 32 : 48);
 
   const pushBytes = (...bytes: number[]) => {
     for (let i = 0; i < bytes.length; i++) buffer.push(bytes[i]);
@@ -80,12 +84,23 @@ export function generateEscPosBytes(bill: Bill, settings: ShopSettings, language
     for (let i = 0; i < encoded.length; i++) buffer.push(encoded[i]);
   };
 
+  const line = '-'.repeat(cols) + '\r\n';
+  const dLine = '='.repeat(cols) + '\r\n';
+
   // 1. Initialize printer (ESC @)
   pushBytes(0x1B, 0x40);
 
-  // 2. TOP: Hotel Name and Phone Number (Center Align: ESC a 1)
+  // 2. Set compact line spacing to eliminate top/inner vertical gaps (ESC 3 24 = 24 dots)
+  pushBytes(0x1B, 0x33, 24);
+
+  // 3. Set left margin to 0 and full printable width
+  pushBytes(0x1D, 0x4C, 0x00, 0x00); // GS L 0 0 -> Left margin 0
+  const printWidthDots = cols * 12; // 48 * 12 = 576 dots
+  pushBytes(0x1D, 0x57, printWidthDots & 0xFF, (printWidthDots >> 8) & 0xFF); // GS W nL nH
+
+  // 4. TOP: Hotel Name and Phone Number (Center Align: ESC a 1)
   pushBytes(0x1B, 0x61, 0x01);
-  pushText(`================================\r\n`);
+  pushText(dLine);
 
   const hotel = (bill.hotelName || settings.shopName || 'HOTEL').toUpperCase();
   const phone = bill.hotelPhone || settings.phoneNumber || '';
@@ -102,16 +117,17 @@ export function generateEscPosBytes(bill: Bill, settings: ShopSettings, language
     pushText(`Ph: ${phone}\r\n`);
     pushBytes(0x1B, 0x45, 0x00); // Bold OFF
   }
-  pushText(`================================\r\n`);
+  pushText(dLine);
 
-  // 3. TABLE HEADER: Left side ITEM, Right side TOTAL (Left Align: ESC a 0)
+  // 5. TABLE HEADER: Left side ITEM, Right side TOTAL (Left Align: ESC a 0)
   pushBytes(0x1B, 0x61, 0x00);
   pushBytes(0x1B, 0x45, 0x01); // Bold ON
-  pushText(`ITEM                       TOTAL\r\n`);
+  const headerSpaces = Math.max(1, cols - 4 - 5);
+  pushText(`ITEM${' '.repeat(headerSpaces)}TOTAL\r\n`);
   pushBytes(0x1B, 0x45, 0x00); // Bold OFF
-  pushText(`--------------------------------\r\n`);
+  pushText(line);
 
-  // 4. ITEMS: Left side item, Right side amount
+  // 6. ITEMS: Left side item, Right side amount aligned to col 'cols'
   bill.items.forEach((item, index) => {
     const rawName = item.productNameEn || item.productName || 'Chicken';
     const cleanName = rawName.replace(/[^\x20-\x7E]/g, '').trim() || 'Chicken';
@@ -119,12 +135,12 @@ export function generateEscPosBytes(bill: Bill, settings: ShopSettings, language
     const amtStr = `Rs.${Math.round(item.amount)}`;
 
     pushBytes(0x1B, 0x45, 0x01); // Bold ON
-    if (itemTitle.length + amtStr.length + 1 <= 32) {
-      const spaces = 32 - itemTitle.length - amtStr.length;
+    if (itemTitle.length + amtStr.length + 1 <= cols) {
+      const spaces = cols - itemTitle.length - amtStr.length;
       pushText(`${itemTitle}${' '.repeat(spaces)}${amtStr}\r\n`);
     } else {
       pushText(`${itemTitle}\r\n`);
-      const spaces = 32 - amtStr.length;
+      const spaces = Math.max(1, cols - amtStr.length);
       pushText(`${' '.repeat(spaces)}${amtStr}\r\n`);
     }
     pushBytes(0x1B, 0x45, 0x00); // Bold OFF
@@ -133,21 +149,24 @@ export function generateEscPosBytes(bill: Bill, settings: ShopSettings, language
     pushText(`   ${item.kg.toFixed(2)} kg x Rs.${item.pricePerKg}\r\n`);
   });
 
-  pushText(`--------------------------------\r\n`);
+  pushText(line);
 
-  // 5. TOTAL: Left side TOTAL, Right side Total Amount in BIG FONT
+  // 7. TOTAL: Left side TOTAL, Right side Total Amount in BIG FONT across full width
+  // In double-width mode (2x horizontal), line capacity is floor(cols / 2).
+  const doubleCols = Math.floor(cols / 2);
+  const totalLeft = 'TOTAL:';
+  const totalVal = `Rs. ${Math.round(bill.totalAmount)}`;
+  const spacesDouble = Math.max(1, doubleCols - totalLeft.length - totalVal.length);
+
   pushBytes(0x1B, 0x45, 0x01); // Bold ON
   pushBytes(0x1D, 0x21, 0x11); // GS ! 0x11 (2x width + 2x height)
-  const totalVal = `Rs. ${Math.round(bill.totalAmount)}`;
-  const totalLeft = 'TOTAL:';
-  const spacesDouble = Math.max(1, 16 - totalLeft.length - totalVal.length);
   pushText(`${totalLeft}${' '.repeat(spacesDouble)}${totalVal}\r\n`);
   pushBytes(0x1D, 0x21, 0x00); // Reset font size
   pushBytes(0x1B, 0x45, 0x00); // Bold OFF
-  pushText(`================================\r\n`);
+  pushText(dLine);
 
-  // 6. Feed to approx 17cm length and cut
-  pushText(`\r\n\r\n\r\n\r\n\r\n\r\n`);
+  // 8. Minimal feed to bring receipt just past the cutter bar (eliminates wasted bottom paper)
+  pushBytes(0x1B, 0x64, 0x02); // ESC d 2 -> Feed only 2 lines
   pushBytes(0x1D, 0x56, 0x42, 0x00); // GS V 66 0 (Partial paper cut)
 
   return new Uint8Array(buffer);

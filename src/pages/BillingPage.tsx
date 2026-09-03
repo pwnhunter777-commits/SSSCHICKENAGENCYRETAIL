@@ -268,11 +268,11 @@ export const BillingPage: React.FC<BillingPageProps> = ({
     setTimeout(() => setToastMessage(null), 2000);
   };
 
-  // Helper to trigger direct thermal print (17cm x 7cm) without changing screen
+  // Helper to trigger direct thermal print without changing screen
   const triggerSystemThermalPrint = () => {
     const style = document.createElement('style');
     style.id = 'print-page-size-style';
-    style.innerHTML = '@page { size: 17cm 7cm; margin: 0; }';
+    style.innerHTML = '@page { size: auto; margin: 0; }';
     document.head.appendChild(style);
 
     window.print();
@@ -501,60 +501,59 @@ export const BillingPage: React.FC<BillingPageProps> = ({
         </div>
       </div>
 
-      {/* 17cm x 7cm Thermal Printable Receipt for direct system printing without screen change */}
+      {/* Thermal Printable Receipt for direct system printing without screen change */}
       <div className="invisible fixed -left-[9999px] top-0 print:visible print:left-0 print:top-0 print:block">
         <div
           id="printable-receipt"
-          className="receipt-landscape bg-white border-2 border-black flex flex-col justify-between overflow-hidden text-black select-text shadow-none font-mono"
+          className="bg-white flex flex-col justify-between text-black select-text shadow-none font-mono"
           style={{
-            width: '17cm',
-            height: '7cm',
-            maxWidth: '17cm',
-            maxHeight: '7cm',
+            width: '80mm',
+            maxWidth: '80mm',
             boxSizing: 'border-box',
-            padding: '2.5mm 3.5mm',
+            padding: '1mm 2mm',
+            margin: '0',
           }}
         >
-          {/* TOP: Hotel Name and Phone number only */}
-          <div className="text-center border-b border-black pb-1">
+          {/* TOP: Hotel Name and Phone number only (Zero extra top margin) */}
+          <div className="text-center border-b-2 border-black pb-1 pt-0">
             <h1 className="text-sm font-black tracking-wider uppercase text-black leading-tight">
               {(settings.shopName || 'HOTEL').toUpperCase()}
             </h1>
             {settings.phoneNumber && (
-              <p className="text-xs font-bold text-black">
+              <p className="text-xs font-bold text-black mt-0.5">
                 Ph: {settings.phoneNumber}
               </p>
             )}
           </div>
 
           {/* MAIN BODY: Left side (Item) & Right side (Total) */}
-          <div className="flex-1 flex flex-col justify-between pt-1.5 min-h-0">
+          <div className="flex-1 flex flex-col justify-between pt-1 min-h-0">
             {/* Header Row */}
-            <div className="flex items-center justify-between border-b-2 border-black pb-0.5 mb-1 text-[11px] font-black uppercase tracking-wider">
+            <div className="flex items-center justify-between border-b-2 border-black pb-0.5 mb-1 text-xs font-black uppercase tracking-wider">
               <span>ITEM</span>
               <span>TOTAL</span>
             </div>
 
             {/* Items */}
-            <div className="space-y-1 flex-1 overflow-y-auto">
+            <div className="space-y-1">
               {(lastPrintedBill?.items || activeBillItems).map((item, idx) => (
-                <div key={idx} className="flex items-center justify-between">
-                  <div className="text-left">
-                    <span className="text-xs font-black text-black">
+                <div key={idx} className="flex items-start justify-between">
+                  <div className="text-left flex-1 pr-2">
+                    <div className="text-xs font-black text-black leading-tight">
                       {idx + 1}. {item.productName}
-                    </span>
-                    <span className="text-[10px] font-semibold text-slate-800 ml-2">
-                      ({item.kg.toFixed(2)} kg x Rs.{item.pricePerKg})
-                    </span>
+                    </div>
+                    <div className="text-[10px] font-semibold text-slate-800">
+                      {item.kg.toFixed(2)} kg x Rs.{item.pricePerKg}
+                    </div>
                   </div>
-                  <span className="text-xs font-black text-black">
+                  <span className="text-xs font-black text-black shrink-0">
                     Rs. {Math.round(item.amount)}
                   </span>
                 </div>
               ))}
             </div>
 
-            {/* Bottom Total Row */}
+            {/* Bottom Total Row (Zero extra bottom space) */}
             <div className="border-t-2 border-b-2 border-black py-1 px-1 flex items-center justify-between mt-1 shrink-0">
               <span className="text-xs font-black uppercase tracking-wider">
                 TOTAL:
