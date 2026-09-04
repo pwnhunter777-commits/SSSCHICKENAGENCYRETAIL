@@ -295,7 +295,7 @@ export const DailyPricePage: React.FC<DailyPricePageProps> = ({
           return (
             <div
               key={product.id}
-              className={`bg-white rounded-2xl p-3.5 shadow-sm border transition-all flex items-center justify-between gap-3 ${
+              className={`bg-white rounded-2xl p-3.5 shadow-sm border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 min-h-[4rem] ${
                 isMainCut
                   ? 'border-emerald-500 ring-2 ring-emerald-600/10 shadow-xs'
                   : 'border-emerald-100 hover:border-emerald-300'
@@ -308,24 +308,24 @@ export const DailyPricePage: React.FC<DailyPricePageProps> = ({
                     {primaryDisplay}
                   </span>
                   {secondaryDisplay && secondaryDisplay !== primaryDisplay && (
-                    <span className="text-[11px] text-gray-400 font-medium">
+                    <span className="text-xs text-gray-400 font-medium truncate">
                       ({secondaryDisplay})
                     </span>
                   )}
                   {isMainCut && (
-                    <span className="text-[10px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-300 px-2 py-0.5 rounded-full shrink-0">
+                    <span className="text-xs font-black uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-300 px-2 py-0.5 rounded-full shrink-0">
                       {t.mainCut}
                     </span>
                   )}
                 </div>
-                <div className="text-[11px] text-emerald-800 font-semibold mt-0.5">
+                <div className="text-xs text-emerald-800 font-semibold mt-0.5">
                   {t.rateWithSkin}
                 </div>
               </div>
 
-              {/* Price Input */}
-              <div className="flex items-center gap-2 shrink-0">
-                <div className="relative flex items-center">
+              {/* Price Input & Controls */}
+              <div className="flex items-center justify-between sm:justify-end gap-2 shrink-0">
+                <div className="relative flex items-center flex-1 sm:flex-initial">
                   <span className="absolute left-3 text-gray-500 font-bold text-sm">
                     ₹
                   </span>
@@ -335,7 +335,7 @@ export const DailyPricePage: React.FC<DailyPricePageProps> = ({
                     value={currentPrice}
                     onChange={(e) => handlePriceChange(product.id, e.target.value)}
                     placeholder="0"
-                    className="w-28 bg-emerald-50/50 border-2 border-emerald-300 focus:border-emerald-600 focus:bg-white text-right font-black text-emerald-950 text-base py-1.5 pl-7 pr-3 rounded-xl outline-none transition-all"
+                    className="w-full sm:w-28 bg-emerald-50/50 border-2 border-emerald-300 focus:border-emerald-600 focus:bg-white text-right font-black text-emerald-950 text-base py-1.5 pl-7 pr-3 rounded-xl outline-none transition-all min-h-[2.5rem]"
                   />
                 </div>
                 {/* Delete Product Button */}
@@ -343,7 +343,7 @@ export const DailyPricePage: React.FC<DailyPricePageProps> = ({
                   type="button"
                   onClick={() => setDeleteConfirmId(product.id)}
                   title={t.deleteProduct}
-                  className="w-8 h-8 rounded-xl bg-gray-100 hover:bg-red-50 hover:text-red-600 text-gray-400 flex items-center justify-center transition-colors active:scale-95 shrink-0"
+                  className="w-9 h-9 rounded-xl bg-gray-100 hover:bg-red-50 hover:text-red-600 text-gray-400 flex items-center justify-center transition-colors active:scale-95 shrink-0"
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>

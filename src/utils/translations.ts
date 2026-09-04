@@ -136,6 +136,21 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     changeLogo: 'Change Logo',
     defaultLogoApplied: 'Chicken mascot logo applied',
 
+    // Text Size & Accessibility
+    textSizeAccessibility: 'Text Size & Accessibility',
+    textSizeDesc: 'Adjust font size for larger, clearer reading across all screens. Text automatically fits into available space.',
+    increaseTextSize: 'Increase (A+)',
+    decreaseTextSize: 'Decrease (A-)',
+    textSizeNormal: 'Normal (100%)',
+    textSizeMediumLarge: 'Medium (110%)',
+    textSizeLarge: 'Large (120%)',
+    textSizeExtraLarge: 'Extra Large (130%)',
+    textSizeMaximum: 'Maximum (140%)',
+    resetDefaultTextSize: 'Reset to Default (100%)',
+    textSizePreviewTitle: 'Live Preview',
+    textSizePreviewSample: 'SSS Chicken - Live Chicken ₹220 / Kg',
+    textSizeUpdated: 'Text size updated',
+
     // Password & Security PIN (PWD)
     securityPinSettings: 'Password & Security PIN (PWD)',
     securityPinDesc: 'Protect daily prices, bill deletion, and store settings with a secure 4-digit PIN.',
@@ -334,6 +349,21 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     shopLogo: 'கடை சின்னம் (லோகோ)',
     changeLogo: 'லோகோ மாற்று',
     defaultLogoApplied: 'கோழி லோகோ பொருத்தப்பட்டது',
+
+    // Text Size & Accessibility
+    textSizeAccessibility: 'எழுத்து அளவு & அணுகல்',
+    textSizeDesc: 'அனைத்து திரைகளிலும் எளிதாக படிக்க எழுத்து அளவை பெரிதாக்கலாம். உரை தானாகவே பொருந்தும்.',
+    increaseTextSize: 'அதிகரிக்கவும் (A+)',
+    decreaseTextSize: 'குறைக்கவும் (A-)',
+    textSizeNormal: 'வழக்கமான (100%)',
+    textSizeMediumLarge: 'நடுத்தரம் (110%)',
+    textSizeLarge: 'பெரியது (120%)',
+    textSizeExtraLarge: 'மிகப் பெரியது (130%)',
+    textSizeMaximum: 'அதிகபட்சம் (140%)',
+    resetDefaultTextSize: 'இயல்பு நிலைக்கு மீட்டமை (100%)',
+    textSizePreviewTitle: 'நேரலை முன்னோட்டம்',
+    textSizePreviewSample: 'SSS சிக்கன் - உயிருள்ள கோழி ₹220 / கிலோ',
+    textSizeUpdated: 'எழுத்து அளவு புதுப்பிக்கப்பட்டது',
 
     // Password & Security PIN (PWD)
     securityPinSettings: 'கடவுச்சொல் & பாதுகாப்பு பின் (PWD / PIN)',

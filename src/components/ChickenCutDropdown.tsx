@@ -161,15 +161,15 @@ export const ChickenCutDropdown: React.FC<ChickenCutDropdownProps> = ({
             <div className="w-7 h-7 rounded-xl bg-[#0f3d2e] text-emerald-400 flex items-center justify-center shrink-0">
               <ShoppingBag className="w-4 h-4 stroke-[2.2]" />
             </div>
-            <div className="flex items-center gap-1.5 min-w-0 flex-1">
+            <div className="flex items-center gap-1.5 min-w-0 flex-1 flex-wrap">
               <span className="text-xs sm:text-sm font-black text-slate-900 truncate">
                 {selectedName}
               </span>
-              <span className="text-[11px] font-extrabold text-emerald-700 bg-emerald-50 border border-emerald-200/80 px-1.5 py-0.5 rounded-md shrink-0">
+              <span className="text-xs font-extrabold text-emerald-700 bg-emerald-50 border border-emerald-200/80 px-1.5 py-0.5 rounded-md shrink-0">
                 ₹{selectedBaseRate}/{language === 'ta' ? 'கிலோ' : 'Kg'}
               </span>
               {selectedItemData && selectedItemData.numericAmount > 0 && (
-                <span className="text-[9px] font-bold text-emerald-800 bg-emerald-100 px-1.5 py-0.2 rounded-md shrink-0 hidden sm:inline-block">
+                <span className="text-xs font-bold text-emerald-800 bg-emerald-100 px-1.5 py-0.5 rounded-md shrink-0 hidden sm:inline-block">
                   {t.added}
                 </span>
               )}
@@ -195,7 +195,7 @@ export const ChickenCutDropdown: React.FC<ChickenCutDropdownProps> = ({
             setIsAddingNew(true);
           }}
           title={t.addChickenCut}
-          className="h-9 px-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border border-emerald-300 font-bold text-xs rounded-2xl flex items-center gap-1 shrink-0 transition-all active:scale-95 shadow-2xs"
+          className="min-h-[2.25rem] py-1.5 px-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border border-emerald-300 font-bold text-xs rounded-2xl flex items-center gap-1 shrink-0 transition-all active:scale-95 shadow-2xs"
         >
           <Plus className="w-4 h-4 stroke-[2.5] text-emerald-700" />
           <span className="text-xs font-extrabold">{t.add}</span>
@@ -207,13 +207,13 @@ export const ChickenCutDropdown: React.FC<ChickenCutDropdownProps> = ({
         <div className="absolute top-[calc(100%+4px)] left-0 right-0 z-40 bg-white rounded-2xl border-2 border-emerald-600/30 shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
           {/* Header Bar */}
           <div className="p-2 bg-slate-50 border-b border-slate-100 flex items-center justify-between gap-2">
-            <span className="text-[11px] font-bold text-slate-700">
+            <span className="text-xs font-bold text-slate-700">
               {products.length} {t.cutsAvailable}
             </span>
             <button
               type="button"
               onClick={() => setIsAddingNew(!isAddingNew)}
-              className={`text-[11px] font-bold px-2 py-1 rounded-lg flex items-center gap-1 transition-all ${
+              className={`text-xs font-bold px-2.5 py-1 rounded-lg flex items-center gap-1 transition-all ${
                 isAddingNew
                   ? 'bg-slate-200 text-slate-700'
                   : 'bg-emerald-700 text-white shadow-2xs hover:bg-emerald-800'
@@ -400,7 +400,7 @@ export const ChickenCutDropdown: React.FC<ChickenCutDropdownProps> = ({
                         </span>
                         {secondaryName && secondaryName !== displayName && (
                           <span
-                            className={`text-[10px] font-normal truncate ${
+                            className={`text-xs font-normal truncate ${
                               isSelected ? 'text-emerald-200' : 'text-slate-400'
                             }`}
                           >
@@ -409,7 +409,7 @@ export const ChickenCutDropdown: React.FC<ChickenCutDropdownProps> = ({
                         )}
                         {isMainCut && (
                           <span
-                            className={`text-[9px] font-extrabold uppercase px-1.5 py-0.2 rounded-md shrink-0 ${
+                            className={`text-xs font-extrabold uppercase px-1.5 py-0.5 rounded-md shrink-0 ${
                               isSelected
                                 ? 'bg-emerald-700 text-emerald-100 border border-emerald-500/60'
                                 : 'bg-emerald-100 text-emerald-800 border border-emerald-300'
@@ -419,7 +419,7 @@ export const ChickenCutDropdown: React.FC<ChickenCutDropdownProps> = ({
                           </span>
                         )}
                         <span
-                          className={`text-[11px] font-semibold shrink-0 ${
+                          className={`text-xs font-semibold shrink-0 ${
                             isSelected ? 'text-emerald-200' : 'text-emerald-700'
                           }`}
                         >
@@ -427,7 +427,7 @@ export const ChickenCutDropdown: React.FC<ChickenCutDropdownProps> = ({
                         </span>
                         {hasAmountInBill && (
                           <span
-                            className={`text-[9px] font-bold px-1.5 py-0.2 rounded shrink-0 ${
+                            className={`text-xs font-bold px-1.5 py-0.5 rounded shrink-0 ${
                               isSelected
                                 ? 'bg-emerald-900 text-emerald-200 border border-emerald-700'
                                 : 'bg-emerald-100 text-emerald-800 border border-emerald-200'

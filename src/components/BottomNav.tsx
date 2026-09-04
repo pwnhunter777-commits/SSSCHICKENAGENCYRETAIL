@@ -46,7 +46,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-emerald-100 shadow-[0_-4px_20px_rgba(0,0,0,0.06)] pb-safe">
-      <div className="max-w-md mx-auto grid grid-cols-5 h-16 items-center px-1">
+      <div className="max-w-md mx-auto grid grid-cols-5 min-h-[4.25rem] h-auto items-center px-1 py-1">
         {navItems.map((item) => {
           const isActive = currentPage === item.id;
           return (
@@ -68,7 +68,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
               >
                 {item.icon}
               </div>
-              <span className="text-[10px] mt-0.5 tracking-tight text-center leading-none truncate max-w-full font-medium">
+              <span className="text-xs mt-0.5 tracking-tight text-center leading-tight truncate max-w-full font-bold">
                 {item.label}
               </span>
             </button>

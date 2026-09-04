@@ -19,6 +19,19 @@
     <meta name="apple-mobile-web-app-title" content="Chicken POS" />
     <link rel="apple-touch-icon" href="/logo.png" />
     <link rel="icon" type="image/png" href="/logo.png" />
+    <script>
+      (function() {
+        try {
+          var saved = localStorage.getItem('chicken_shop_font_scale_v1');
+          if (saved) {
+            var num = parseFloat(saved);
+            if (!isNaN(num) && num >= 0.85 && num <= 1.6) {
+              document.documentElement.style.setProperty('--app-font-scale', String(num));
+            }
+          }
+        } catch (e) {}
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

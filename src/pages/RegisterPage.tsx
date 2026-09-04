@@ -194,7 +194,7 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({
                 <span className="text-xs font-extrabold text-emerald-950 uppercase tracking-wide">
                   {formatDisplayDate(dateStr, language)}
                 </span>
-                <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full ml-auto">
+                <span className="text-xs bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full ml-auto">
                   {dateBills.length} {dateBills.length === 1 ? 'bill' : 'bills'}
                 </span>
               </div>
@@ -206,7 +206,7 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({
                   className="bg-white rounded-2xl p-3.5 shadow-sm border border-emerald-100 hover:border-emerald-300 transition-all space-y-2"
                 >
                   {/* Top Row: Bill No & Total Value */}
-                  <div className="flex items-center justify-between pb-2 border-b border-gray-100">
+                  <div className="flex items-center justify-between pb-2 border-b border-gray-100 flex-wrap gap-1">
                     <div className="flex items-center gap-2">
                       <span className="bg-emerald-700 text-white font-extrabold text-xs px-2.5 py-1 rounded-xl shadow-xs">
                         #{bill.billNumber}
@@ -219,20 +219,20 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({
                       <div className="text-base font-black text-emerald-800">
                         ₹ {bill.totalAmount.toFixed(2)}
                       </div>
-                      <div className="text-[10px] font-bold text-gray-500">
+                      <div className="text-xs font-bold text-gray-500">
                         {bill.totalKg.toFixed(2)} {language === 'ta' ? 'கிலோ' : 'KG'}
                       </div>
                     </div>
                   </div>
 
                   {/* Items Summary Line */}
-                  <div className="text-xs text-gray-600 space-y-0.5">
+                  <div className="text-xs text-gray-600 space-y-1">
                     {bill.items.map((it, idx) => (
-                      <div key={idx} className="flex justify-between text-[11px]">
-                        <span className="text-gray-700 truncate max-w-[180px]">
+                      <div key={idx} className="flex justify-between items-center text-xs gap-2">
+                        <span className="text-gray-700 truncate flex-1 min-w-0">
                           • {it.productName} ({it.kg.toFixed(2)} kg)
                         </span>
-                        <span className="font-semibold text-gray-900">
+                        <span className="font-semibold text-gray-900 shrink-0">
                           ₹{Math.round(it.amount)}
                         </span>
                       </div>
@@ -240,9 +240,9 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({
                   </div>
 
                   {/* Card Bottom Actions: Time, Reprint, Delete */}
-                  <div className="flex items-center justify-between pt-2 border-t border-gray-100 text-xs">
-                    <div className="flex items-center gap-1 text-[10px] text-gray-400 font-medium">
-                      <Clock className="w-3 h-3" />
+                  <div className="flex items-center justify-between pt-2 border-t border-gray-100 text-xs flex-wrap gap-2">
+                    <div className="flex items-center gap-1 text-xs text-gray-400 font-medium">
+                      <Clock className="w-3.5 h-3.5" />
                       <span>{bill.time}</span>
                     </div>
 
@@ -251,7 +251,7 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({
                       <button
                         type="button"
                         onClick={() => initiateDelete(bill.id)}
-                        className="bg-gray-100 hover:bg-red-50 hover:text-red-600 text-gray-500 p-2 rounded-xl text-xs font-semibold flex items-center gap-1 transition-colors active:scale-95"
+                        className="bg-gray-100 hover:bg-red-50 hover:text-red-600 text-gray-500 p-2 rounded-xl text-xs font-semibold flex items-center gap-1 transition-colors active:scale-95 min-h-[2.25rem] min-w-[2.25rem] justify-center"
                         title={t.deleteBill}
                       >
                         <Trash2 className="w-3.5 h-3.5" />
@@ -261,7 +261,7 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({
                       <button
                         type="button"
                         onClick={() => setSelectedBillForReprint(bill)}
-                        className="bg-emerald-700 hover:bg-emerald-800 text-white px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm active:scale-95 transition-all"
+                        className="bg-emerald-700 hover:bg-emerald-800 text-white px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm active:scale-95 transition-all min-h-[2.25rem]"
                       >
                         <Printer className="w-3.5 h-3.5" />
                         <span>{t.reprintBill}</span>

@@ -451,22 +451,22 @@ export const BillingPage: React.FC<BillingPageProps> = ({
       {/* Floating / Sticky Bill Summary & Print Controls */}
       <div className="bg-white rounded-3xl p-4 shadow-xl border-2 border-emerald-600 mt-2 mb-4">
         {/* Bill Summary Rows */}
-        <div className="flex items-center justify-between pb-3 border-b border-gray-100">
-          <div>
-            <div className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">
+        <div className="flex items-center justify-between gap-3 pb-3 border-b border-gray-100 flex-wrap">
+          <div className="min-w-0">
+            <div className="text-xs font-bold text-gray-500 uppercase tracking-wider">
               {t.totalKg}
             </div>
             <div className="text-lg font-extrabold text-gray-900 flex items-center gap-1">
-              <Scale className="w-4 h-4 text-emerald-700" />
+              <Scale className="w-4 h-4 text-emerald-700 shrink-0" />
               <span>{totalKg.toFixed(3)} {language === 'ta' ? 'கிலோ' : 'KG'}</span>
             </div>
           </div>
 
-          <div className="text-right">
-            <div className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">
+          <div className="text-right min-w-0">
+            <div className="text-xs font-bold text-gray-500 uppercase tracking-wider">
               {t.totalAmount}
             </div>
-            <div className="text-2xl font-black text-emerald-800 tracking-tight">
+            <div className="text-2xl font-black text-emerald-800 tracking-tight whitespace-nowrap">
               ₹ {totalAmount.toFixed(2)}
             </div>
           </div>
@@ -478,20 +478,20 @@ export const BillingPage: React.FC<BillingPageProps> = ({
             type="button"
             onClick={handleResetBill}
             disabled={activeBillItems.length === 0}
-            className="col-span-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 px-2 rounded-2xl flex flex-col items-center justify-center text-[10px] transition-all disabled:opacity-40"
+            className="col-span-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 px-1 rounded-2xl flex flex-col items-center justify-center text-xs transition-all disabled:opacity-40"
           >
             <RotateCcw className="w-4 h-4 mb-0.5" />
-            <span>{t.clearBill}</span>
+            <span className="text-center leading-tight truncate max-w-full">{t.clearBill}</span>
           </button>
 
           <button
             type="button"
             onClick={handleCreateAndPrintBill}
             disabled={activeBillItems.length === 0 || isPrinting}
-            className="col-span-3 bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold py-3.5 px-4 rounded-2xl flex items-center justify-center gap-2 shadow-lg active:scale-98 transition-all disabled:opacity-50"
+            className="col-span-3 bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold py-3.5 px-3 rounded-2xl flex items-center justify-center gap-2 shadow-lg active:scale-98 transition-all disabled:opacity-50"
           >
-            <Printer className="w-5 h-5 text-emerald-200" />
-            <span className="text-sm">
+            <Printer className="w-5 h-5 text-emerald-200 shrink-0" />
+            <span className="text-base font-extrabold truncate">
               {isPrinting
                 ? t.connecting
                 : language === 'ta'

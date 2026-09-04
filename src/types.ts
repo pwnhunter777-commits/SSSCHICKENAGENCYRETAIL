@@ -45,6 +45,7 @@ export interface ShopSettings {
   printerColumns?: number; // 48 for 80mm (default), 32 for 58mm
   printerFeedLines?: number; // Extra line feeds at bottom (default 0 for zero gap)
   printerAutoCut?: boolean; // Send cut command (default false for manual tear / no feed)
+  fontSizeScale?: number; // Accessibility font scale multiplier (default 1.0)
 }
 
 export interface BillItem {

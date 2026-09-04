@@ -11,6 +11,7 @@ import {
   loadLanguage,
   saveLanguage,
   isPriceSetForToday,
+  applyFontScale,
 } from './utils/storage';
 import { Header } from './components/Header';
 import { BottomNav } from './components/BottomNav';
@@ -55,6 +56,13 @@ export default function App() {
 
     setIsLoaded(true);
   }, []);
+
+  // Ensure font scale is updated whenever settings change
+  useEffect(() => {
+    if (settings?.fontSizeScale !== undefined) {
+      applyFontScale(settings.fontSizeScale);
+    }
+  }, [settings?.fontSizeScale]);
 
   const handleLanguageChange = (newLang: Language) => {
     setLanguage(newLang);

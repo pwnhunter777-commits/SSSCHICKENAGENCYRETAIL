@@ -217,7 +217,7 @@ export const ChickenCutCard: React.FC<ChickenCutCardProps> = ({
                   ({secondaryName})
                 </span>
               )}
-              <span className="text-[10px] font-extrabold text-emerald-800 bg-emerald-100/90 border border-emerald-300 px-2 py-0.5 rounded-full shrink-0">
+              <span className="text-xs font-extrabold text-emerald-800 bg-emerald-100/90 border border-emerald-300 px-2 py-0.5 rounded-full shrink-0">
                 {activeVariant === 'with_skin' ? t.withSkin : t.withoutSkin}
               </span>
             </div>
@@ -265,7 +265,7 @@ export const ChickenCutCard: React.FC<ChickenCutCardProps> = ({
                   setTempOffset(String(withoutSkinOffset));
                   setIsEditingOffset(!isEditingOffset);
                 }}
-                className="text-[11px] font-bold text-emerald-800 hover:text-emerald-950 flex items-center gap-1 bg-emerald-50 hover:bg-emerald-100/80 px-2 py-0.5 rounded-lg border border-emerald-200 transition-colors"
+                className="text-xs font-bold text-emerald-800 hover:text-emerald-950 flex items-center gap-1 bg-emerald-50 hover:bg-emerald-100/80 px-2.5 py-1 rounded-lg border border-emerald-200 transition-colors"
               >
                 <Edit2 className="w-3 h-3 text-emerald-700" />
                 <span>
@@ -295,7 +295,7 @@ export const ChickenCutCard: React.FC<ChickenCutCardProps> = ({
                 >
                   {t.withSkin}
                 </span>
-                <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200/60 px-2.5 py-0.5 rounded-md mt-1">
+                <span className="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200/60 px-2 py-0.5 rounded-md mt-1 max-w-full truncate text-center">
                   ₹{rateWithSkin.toFixed(2)} / {language === 'ta' ? 'கிலோ' : 'Kg'}
                 </span>
               </button>
@@ -310,7 +310,7 @@ export const ChickenCutCard: React.FC<ChickenCutCardProps> = ({
                     : 'border border-slate-200 bg-white hover:border-slate-300'
                 }`}
               >
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-1 flex-wrap justify-center">
                   <span
                     className={`text-xs font-bold ${
                       activeVariant === 'without_skin'
@@ -320,11 +320,11 @@ export const ChickenCutCard: React.FC<ChickenCutCardProps> = ({
                   >
                     {t.withoutSkin}
                   </span>
-                  <span className="text-[10px] font-bold text-emerald-700">
+                  <span className="text-xs font-bold text-emerald-700">
                     (+₹{withoutSkinOffset})
                   </span>
                 </div>
-                <span className="text-[11px] font-bold text-emerald-800 bg-emerald-100/90 px-2.5 py-0.5 rounded-md mt-1">
+                <span className="text-xs font-bold text-emerald-800 bg-emerald-100/90 px-2 py-0.5 rounded-md mt-1 max-w-full truncate text-center">
                   ₹{rateWithoutSkin.toFixed(2)} / {language === 'ta' ? 'கிலோ' : 'Kg'}
                 </span>
               </button>
@@ -341,7 +341,7 @@ export const ChickenCutCard: React.FC<ChickenCutCardProps> = ({
                     <Sparkles className="w-3.5 h-3.5 text-emerald-700" />
                     <span>{t.withoutSkinOffsetTitle}</span>
                   </span>
-                  <span className="text-[10px] text-slate-500 font-medium">
+                  <span className="text-xs text-slate-500 font-medium">
                     {t.addedToWithSkin}
                   </span>
                 </div>
@@ -358,16 +358,16 @@ export const ChickenCutCard: React.FC<ChickenCutCardProps> = ({
                       value={tempOffset}
                       onChange={(e) => setTempOffset(e.target.value)}
                       placeholder="50"
-                      className="w-full bg-white border border-emerald-300 rounded-xl pl-9 pr-14 py-1.5 text-xs font-bold text-slate-900 outline-none focus:ring-2 focus:ring-emerald-600/20"
+                      className="w-full bg-white border border-emerald-300 rounded-xl pl-9 pr-14 py-2 text-xs font-bold text-slate-900 outline-none focus:ring-2 focus:ring-emerald-600/20"
                     />
-                    <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400">
+                    <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">
                       / {language === 'ta' ? 'கிலோ' : 'Kg'}
                     </span>
                   </div>
                   {/* Save Button */}
                   <button
                     type="submit"
-                    className="bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs px-3.5 py-1.5 rounded-xl shadow-xs flex items-center gap-1 active:scale-95 transition-all"
+                    className="bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs px-3.5 py-2 rounded-xl shadow-xs flex items-center gap-1 active:scale-95 transition-all"
                   >
                     <Check className="w-3.5 h-3.5 stroke-[2.5]" />
                     <span>{t.save}</span>
@@ -375,7 +375,7 @@ export const ChickenCutCard: React.FC<ChickenCutCardProps> = ({
                 </div>
                 {/* Quick Increase Preset Chips */}
                 <div className="flex items-center gap-1.5 mt-2 flex-wrap">
-                  <span className="text-[10px] font-bold text-slate-500">
+                  <span className="text-xs font-bold text-slate-500">
                     {t.quick}
                   </span>
                   {[20, 30, 40, 50, 60].map((val) => (
@@ -383,7 +383,7 @@ export const ChickenCutCard: React.FC<ChickenCutCardProps> = ({
                       key={val}
                       type="button"
                       onClick={() => setTempOffset(String(val))}
-                      className={`text-[10px] font-bold px-2 py-0.5 rounded-lg border transition-colors ${
+                      className={`text-xs font-bold px-2.5 py-1 rounded-lg border transition-colors ${
                         tempOffset === String(val)
                           ? 'bg-emerald-700 text-white border-emerald-700'
                           : 'bg-white text-slate-700 border-slate-200 hover:bg-emerald-100/60'
@@ -414,13 +414,13 @@ export const ChickenCutCard: React.FC<ChickenCutCardProps> = ({
             </label>
             <div className="grid grid-cols-2 gap-2.5">
               {/* Weight Card */}
-              <div className="bg-white border-2 border-slate-200 focus-within:border-emerald-600 rounded-xl p-2.5 flex items-center justify-between transition-colors shadow-xs">
+              <div className="bg-white border-2 border-slate-200 focus-within:border-emerald-600 rounded-xl p-2.5 min-h-[4.25rem] flex items-center justify-between transition-colors shadow-xs">
                 <div className="flex items-center gap-2 flex-1 min-w-0">
                   <div className="text-emerald-700 shrink-0">
                     <Scale className="w-4 h-4" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <span className="text-[10px] font-bold text-slate-400 block uppercase tracking-wider">
+                    <span className="text-xs font-bold text-slate-400 block uppercase tracking-wider">
                       {t.weightKg}
                     </span>
                     <input
@@ -435,32 +435,34 @@ export const ChickenCutCard: React.FC<ChickenCutCardProps> = ({
                   </div>
                 </div>
                 {/* Weight Steppers */}
-                <div className="flex flex-col gap-0.5 shrink-0 ml-1">
+                <div className="flex flex-col gap-1 shrink-0 ml-1">
                   <button
                     type="button"
                     onClick={() => handleStepKg(0.25)}
-                    className="p-1 bg-slate-100 hover:bg-emerald-100 hover:text-emerald-900 text-slate-600 rounded transition-colors"
+                    className="p-1.5 bg-slate-100 hover:bg-emerald-100 hover:text-emerald-900 text-slate-600 rounded-md transition-colors active:scale-90"
+                    aria-label="Increase weight"
                   >
-                    <Plus className="w-3 h-3" />
+                    <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
                   </button>
                   <button
                     type="button"
                     onClick={() => handleStepKg(-0.25)}
-                    className="p-1 bg-slate-100 hover:bg-red-100 hover:text-red-900 text-slate-600 rounded transition-colors"
+                    className="p-1.5 bg-slate-100 hover:bg-red-100 hover:text-red-900 text-slate-600 rounded-md transition-colors active:scale-90"
+                    aria-label="Decrease weight"
                   >
-                    <Minus className="w-3 h-3" />
+                    <Minus className="w-3.5 h-3.5 stroke-[2.5]" />
                   </button>
                 </div>
               </div>
 
               {/* Amount Card */}
-              <div className="bg-white border-2 border-slate-200 focus-within:border-emerald-600 rounded-xl p-2.5 flex items-center justify-between transition-colors shadow-xs">
+              <div className="bg-white border-2 border-slate-200 focus-within:border-emerald-600 rounded-xl p-2.5 min-h-[4.25rem] flex items-center justify-between transition-colors shadow-xs">
                 <div className="flex items-center gap-2 flex-1 min-w-0">
                   <div className="text-emerald-700 font-extrabold text-base shrink-0">
                     ₹
                   </div>
                   <div className="flex-1 min-w-0">
-                    <span className="text-[10px] font-bold text-slate-400 block uppercase tracking-wider">
+                    <span className="text-xs font-bold text-slate-400 block uppercase tracking-wider">
                       {t.priceRs}
                     </span>
                     <input
@@ -475,20 +477,22 @@ export const ChickenCutCard: React.FC<ChickenCutCardProps> = ({
                   </div>
                 </div>
                 {/* Price Steppers */}
-                <div className="flex flex-col gap-0.5 shrink-0 ml-1">
+                <div className="flex flex-col gap-1 shrink-0 ml-1">
                   <button
                     type="button"
                     onClick={() => handleStepPrice(10)}
-                    className="p-1 bg-slate-100 hover:bg-emerald-100 hover:text-emerald-900 text-slate-600 rounded transition-colors"
+                    className="p-1.5 bg-slate-100 hover:bg-emerald-100 hover:text-emerald-900 text-slate-600 rounded-md transition-colors active:scale-90"
+                    aria-label="Increase price"
                   >
-                    <Plus className="w-3 h-3" />
+                    <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
                   </button>
                   <button
                     type="button"
                     onClick={() => handleStepPrice(-10)}
-                    className="p-1 bg-slate-100 hover:bg-red-100 hover:text-red-900 text-slate-600 rounded transition-colors"
+                    className="p-1.5 bg-slate-100 hover:bg-red-100 hover:text-red-900 text-slate-600 rounded-md transition-colors active:scale-90"
+                    aria-label="Decrease price"
                   >
-                    <Minus className="w-3 h-3" />
+                    <Minus className="w-3.5 h-3.5 stroke-[2.5]" />
                   </button>
                 </div>
               </div>
@@ -497,16 +501,16 @@ export const ChickenCutCard: React.FC<ChickenCutCardProps> = ({
 
           {/* Quick KG Selector Chips */}
           <div className="mt-3">
-            <span className="text-[11px] font-bold text-slate-500 block mb-1.5">
+            <span className="text-xs font-bold text-slate-500 block mb-1.5">
               {t.quickWeightPresets}
             </span>
-            <div className="grid grid-cols-6 gap-1.5">
+            <div className="grid grid-cols-3 sm:grid-cols-6 gap-1.5">
               {[0.25, 0.5, 1, 1.5, 2, 5].map((val) => (
                 <button
                   key={val}
                   type="button"
                   onClick={() => handleQuickKg(val)}
-                  className={`py-1.5 rounded-lg text-xs font-extrabold transition-all border ${
+                  className={`py-2 px-1 rounded-xl text-xs font-extrabold transition-all border text-center whitespace-nowrap ${
                     parseFloat(data.kg) === val
                       ? 'bg-[#0f3d2e] text-white border-[#0f3d2e] shadow-xs'
                       : 'bg-slate-50 hover:bg-emerald-50 text-slate-700 border-slate-200'
@@ -520,16 +524,16 @@ export const ChickenCutCard: React.FC<ChickenCutCardProps> = ({
 
           {/* Quick Amount Selector Chips */}
           <div className="mt-2.5">
-            <span className="text-[11px] font-bold text-slate-500 block mb-1.5">
+            <span className="text-xs font-bold text-slate-500 block mb-1.5">
               {t.quickPricePresets}
             </span>
-            <div className="grid grid-cols-6 gap-1.5">
+            <div className="grid grid-cols-3 sm:grid-cols-6 gap-1.5">
               {[50, 100, 150, 200, 500, 1000].map((val) => (
                 <button
                   key={val}
                   type="button"
                   onClick={() => handleQuickAmount(val)}
-                  className={`py-1.5 rounded-lg text-xs font-extrabold transition-all border ${
+                  className={`py-2 px-1 rounded-xl text-xs font-extrabold transition-all border text-center whitespace-nowrap ${
                     parseFloat(data.price) === val
                       ? 'bg-emerald-700 text-white border-emerald-700 shadow-xs'
                       : 'bg-slate-50 hover:bg-emerald-50 text-slate-700 border-slate-200'
@@ -552,10 +556,10 @@ export const ChickenCutCard: React.FC<ChickenCutCardProps> = ({
               <span>{t.clearRemove}</span>
             </button>
             <div className="text-right">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">
                 {t.itemTotal}
               </span>
-              <span className="text-base font-black text-slate-900">
+              <span className="text-base sm:text-lg font-black text-slate-900 whitespace-nowrap">
                 ₹{data.numericAmount > 0 ? data.numericAmount.toFixed(2) : '0.00'}
               </span>
             </div>

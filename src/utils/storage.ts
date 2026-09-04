@@ -35,6 +35,7 @@ export const DEFAULT_SETTINGS: ShopSettings = {
   protectBillDelete: true,
   protectAppLock: false,
   logoUrl: '/logo.png',
+  fontSizeScale: 1.0,
 };
 
 export const DEFAULT_AROMAKE_HOTELS: string[] = [
@@ -225,11 +226,19 @@ export function loadShopSettings(): ShopSettings {
         protectBillDelete: parsed.protectBillDelete ?? true,
         protectAppLock: parsed.protectAppLock ?? false,
         logoUrl: parsed.logoUrl || '/logo.png',
+        fontSizeScale:
+          parsed.fontSizeScale !== undefined
+            ? Number(parsed.fontSizeScale)
+            : 1.0,
         withoutSkinOffset:
           parsed.withoutSkinOffset !== undefined
             ? Number(parsed.withoutSkinOffset)
             : 50,
       };
+
+      if (upgradedSettings.fontSizeScale) {
+        applyFontScale(upgradedSettings.fontSizeScale);
+      }
 
       const needsUpgrade = isOldPlaceholder || localStorage.getItem('printer_feed_upgraded_v3') !== 'true';
       if (needsUpgrade) {
@@ -241,13 +250,29 @@ export function loadShopSettings(): ShopSettings {
   } catch (e) {
     console.error('Error loading settings from localStorage', e);
   }
+  applyFontScale(DEFAULT_SETTINGS.fontSizeScale || 1.0);
   saveShopSettings(DEFAULT_SETTINGS);
   return DEFAULT_SETTINGS;
+}
+
+export function applyFontScale(scale: number): void {
+  if (typeof document !== 'undefined') {
+    const safeScale = Math.min(1.5, Math.max(0.85, Number(scale) || 1.0));
+    document.documentElement.style.setProperty('--app-font-scale', String(safeScale));
+    try {
+      localStorage.setItem('chicken_shop_font_scale_v1', String(safeScale));
+    } catch {
+      // ignore
+    }
+  }
 }
 
 export function saveShopSettings(settings: ShopSettings): void {
   try {
     localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(settings));
+    if (settings.fontSizeScale !== undefined) {
+      applyFontScale(settings.fontSizeScale);
+    }
   } catch (e) {
     console.error('Error saving settings to localStorage', e);
   }

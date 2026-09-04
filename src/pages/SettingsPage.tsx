@@ -11,10 +11,14 @@ import {
   Smartphone,
   WifiOff,
   Printer,
+  Type,
+  Plus,
+  Minus,
+  RotateCcw,
 } from 'lucide-react';
 import { ShopSettings, Language } from '../types';
 import { TRANSLATIONS } from '../utils/translations';
-import { saveShopSettings } from '../utils/storage';
+import { saveShopSettings, applyFontScale } from '../utils/storage';
 import { InstallAppModal } from '../components/InstallAppModal';
 
 interface SettingsPageProps {
@@ -32,6 +36,28 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
   const [formData, setFormData] = useState<ShopSettings>({ ...settings });
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [showInstallModal, setShowInstallModal] = useState(false);
+
+  const currentScale = formData.fontSizeScale !== undefined ? formData.fontSizeScale : 1.0;
+
+  const handleScaleChange = (newScale: number) => {
+    const clamped = Math.min(1.5, Math.max(0.85, Number(newScale.toFixed(2))));
+    handleChange('fontSizeScale', clamped);
+    applyFontScale(clamped);
+    const updated = { ...formData, fontSizeScale: clamped };
+    setSettings(updated);
+    saveShopSettings(updated);
+    setToastMessage(`${t.textSizeUpdated || 'Text size updated'}: ${Math.round(clamped * 100)}%`);
+    setTimeout(() => setToastMessage(null), 2000);
+  };
+
+  const getScaleLabel = (scale: number) => {
+    if (scale <= 0.92) return language === 'ta' ? 'சிறியது' : 'Compact';
+    if (scale <= 1.05) return t.textSizeNormal || 'Normal';
+    if (scale <= 1.18) return t.textSizeMediumLarge || 'Medium';
+    if (scale <= 1.32) return t.textSizeLarge || 'Large';
+    if (scale <= 1.42) return t.textSizeExtraLarge || 'Extra Large';
+    return t.textSizeMaximum || 'Maximum';
+  };
 
   const handleChange = (field: keyof ShopSettings, value: any) => {
     setFormData((prev) => ({
@@ -112,6 +138,124 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
         >
           {t.howToInstall}
         </button>
+      </div>
+
+      {/* Text Size & Accessibility Section (Increase / Decrease Buttons) */}
+      <div className="bg-white rounded-3xl p-4 shadow-sm border-2 border-emerald-600/40 mb-4 transition-all">
+        <div className="flex items-start gap-2.5 mb-3">
+          <div className="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0 shadow-xs">
+            <Type className="w-5 h-5 stroke-[2.2]" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h3 className="text-base font-black text-gray-900 leading-tight">
+                {t.textSizeAccessibility || 'Text Size & Accessibility'}
+              </h3>
+              <span className="text-xs font-extrabold text-emerald-800 bg-emerald-100/90 border border-emerald-300 px-2 py-0.5 rounded-full shrink-0">
+                {Math.round(currentScale * 100)}% - {getScaleLabel(currentScale)}
+              </span>
+            </div>
+            <p className="text-xs text-gray-500 font-medium leading-normal mt-1">
+              {t.textSizeDesc || 'Adjust font size for larger, clearer reading across all screens. Text automatically fits into available space.'}
+            </p>
+          </div>
+        </div>
+
+        {/* Increase & Decrease Buttons Row */}
+        <div className="bg-emerald-50/80 border border-emerald-200/90 rounded-2xl p-2.5 flex items-center justify-between gap-2.5 mb-3">
+          {/* Decrease Button */}
+          <button
+            type="button"
+            onClick={() => handleScaleChange(currentScale - 0.1)}
+            disabled={currentScale <= 0.85}
+            className="flex-1 min-h-[3rem] py-2.5 px-3 bg-white hover:bg-emerald-100/70 active:scale-95 text-emerald-950 font-black rounded-xl border border-emerald-300 shadow-xs flex items-center justify-center gap-1.5 disabled:opacity-40 disabled:pointer-events-none transition-all"
+            aria-label="Decrease font size"
+          >
+            <Minus className="w-4 h-4 text-emerald-700 shrink-0 stroke-[3]" />
+            <span className="text-xs font-black truncate">
+              {t.decreaseTextSize || 'Decrease (A-)'}
+            </span>
+          </button>
+
+          {/* Current Scale Percentage Box */}
+          <div className="flex flex-col items-center justify-center px-2 min-w-[72px] shrink-0 text-center select-none">
+            <span className="text-xl font-black text-emerald-900 leading-none">
+              {Math.round(currentScale * 100)}%
+            </span>
+            <span className="text-xs font-extrabold text-emerald-700 uppercase tracking-wider mt-0.5">
+              {getScaleLabel(currentScale)}
+            </span>
+          </div>
+
+          {/* Increase Button */}
+          <button
+            type="button"
+            onClick={() => handleScaleChange(currentScale + 0.1)}
+            disabled={currentScale >= 1.5}
+            className="flex-1 min-h-[3rem] py-2.5 px-3 bg-emerald-700 hover:bg-emerald-800 active:scale-95 text-white font-black rounded-xl shadow-md flex items-center justify-center gap-1.5 disabled:opacity-40 disabled:pointer-events-none transition-all"
+            aria-label="Increase font size"
+          >
+            <Plus className="w-4 h-4 text-emerald-200 shrink-0 stroke-[3]" />
+            <span className="text-xs font-black truncate">
+              {t.increaseTextSize || 'Increase (A+)'}
+            </span>
+          </button>
+        </div>
+
+        {/* Quick Presets Grid */}
+        <div className="grid grid-cols-5 gap-1.5 mb-3">
+          {[
+            { scale: 0.9, label: '90%', name: language === 'ta' ? 'சிறியது' : 'Small' },
+            { scale: 1.0, label: '100%', name: t.textSizeNormal || 'Normal' },
+            { scale: 1.15, label: '115%', name: t.textSizeMediumLarge || 'Medium' },
+            { scale: 1.3, label: '130%', name: t.textSizeLarge || 'Large' },
+            { scale: 1.45, label: '145%', name: t.textSizeExtraLarge || 'Extra' },
+          ].map((preset) => {
+            const isSelected = Math.abs(currentScale - preset.scale) < 0.05;
+            return (
+              <button
+                key={preset.scale}
+                type="button"
+                onClick={() => handleScaleChange(preset.scale)}
+                className={`py-2 px-1 rounded-xl text-xs font-extrabold border transition-all text-center flex flex-col items-center justify-center ${
+                  isSelected
+                    ? 'bg-emerald-800 text-white border-emerald-900 shadow-sm'
+                    : 'bg-white text-gray-700 border-gray-200 hover:border-emerald-300 hover:bg-emerald-50/50'
+                }`}
+              >
+                <span className="leading-tight">{preset.label}</span>
+                <span className="text-xs opacity-85 leading-tight truncate max-w-full font-semibold mt-0.5">
+                  {preset.name}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Live Preview Box */}
+        <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3 flex items-center justify-between gap-2.5">
+          <div className="min-w-0 flex-1">
+            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-0.5">
+              {t.textSizePreviewTitle || 'Live Preview'}
+            </span>
+            <div className="text-sm font-black text-gray-900 truncate">
+              {language === 'ta' ? 'உயிருள்ள கோழி - 1.500 கிலோ' : 'Live Chicken - 1.500 Kg'}
+            </div>
+            <div className="text-xs font-bold text-emerald-800 mt-0.5 truncate">
+              ₹330.00 (₹220.00 × 1.5)
+            </div>
+          </div>
+          {currentScale !== 1.0 && (
+            <button
+              type="button"
+              onClick={() => handleScaleChange(1.0)}
+              className="px-2.5 py-1.5 text-xs font-bold text-slate-600 hover:text-emerald-800 bg-white border border-slate-200 hover:border-slate-300 rounded-xl shrink-0 flex items-center gap-1 active:scale-95 transition-all shadow-2xs"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+              <span>{t.resetDefaultTextSize ? t.resetDefaultTextSize.split(' ')[0] : 'Reset'}</span>
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Settings Form */}

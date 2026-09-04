@@ -134,36 +134,36 @@ export const TotalPage: React.FC<TotalPageProps> = ({
       {/* Main Totals Card: Total KG Sold & Total Amount */}
       <div className="grid grid-cols-2 gap-2.5 mb-4">
         {/* Total KG Sold */}
-        <div className="bg-white rounded-2xl p-4 shadow-sm border-2 border-emerald-600/30 flex flex-col justify-between">
-          <div className="flex items-center gap-1.5 text-emerald-700 mb-1">
-            <Scale className="w-4 h-4" />
-            <span className="text-[11px] font-extrabold uppercase tracking-wide">
+        <div className="bg-white rounded-2xl p-4 shadow-sm border-2 border-emerald-600/30 flex flex-col justify-between min-h-[6.5rem]">
+          <div className="flex items-center gap-1.5 text-emerald-700 mb-1 flex-wrap">
+            <Scale className="w-4 h-4 shrink-0" />
+            <span className="text-xs font-extrabold uppercase tracking-wide">
               {t.totalKgSold}
             </span>
           </div>
-          <div className="text-xl font-black text-gray-900 tracking-tight">
+          <div className="text-lg sm:text-xl font-black text-gray-900 tracking-tight leading-tight my-1">
             {overallTotalKg.toFixed(3)}
             <span className="text-xs font-bold text-emerald-700 ml-1">
               {language === 'ta' ? 'கிலோ' : 'KG'}
             </span>
           </div>
-          <div className="text-[10px] text-gray-500 font-medium mt-1">
+          <div className="text-xs text-gray-500 font-medium mt-1">
             {relevantBills.length} {language === 'ta' ? 'பில்கள்' : 'bills'}
           </div>
         </div>
 
         {/* Total Amount */}
-        <div className="bg-emerald-700 text-white rounded-2xl p-4 shadow-md border border-emerald-800 flex flex-col justify-between">
-          <div className="flex items-center gap-1.5 text-emerald-200 mb-1">
-            <IndianRupee className="w-4 h-4" />
-            <span className="text-[11px] font-extrabold uppercase tracking-wide">
+        <div className="bg-emerald-700 text-white rounded-2xl p-4 shadow-md border border-emerald-800 flex flex-col justify-between min-h-[6.5rem]">
+          <div className="flex items-center gap-1.5 text-emerald-200 mb-1 flex-wrap">
+            <IndianRupee className="w-4 h-4 shrink-0" />
+            <span className="text-xs font-extrabold uppercase tracking-wide">
               {t.totalRevenue}
             </span>
           </div>
-          <div className="text-xl font-black text-white tracking-tight">
+          <div className="text-lg sm:text-xl font-black text-white tracking-tight leading-tight my-1 break-all">
             ₹ {overallTotalAmount.toFixed(2)}
           </div>
-          <div className="text-[10px] text-emerald-100 font-medium mt-1">
+          <div className="text-xs text-emerald-100 font-medium mt-1">
             {t.totalRevenue}
           </div>
         </div>
@@ -175,7 +175,7 @@ export const TotalPage: React.FC<TotalPageProps> = ({
           <span className="text-xs font-extrabold text-emerald-950 uppercase tracking-wide">
             {t.productWiseReport}
           </span>
-          <span className="text-[11px] font-bold text-emerald-700">
+          <span className="text-xs font-bold text-emerald-700">
             {products.length} {t.products}
           </span>
         </div>
