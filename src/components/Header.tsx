@@ -9,6 +9,7 @@ interface HeaderProps {
   currentLanguage: Language;
   onLanguageChange: (lang: Language) => void;
   onInstallClick?: () => void;
+  onFontSizeChange?: (newScale: number) => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -16,15 +17,50 @@ export const Header: React.FC<HeaderProps> = ({
   currentLanguage,
   onLanguageChange,
   onInstallClick,
+  onFontSizeChange,
 }) => {
   const [showLangMenu, setShowLangMenu] = useState(false);
   const [imgError, setImgError] = useState(false);
+  const [fontToast, setFontToast] = useState<string | null>(null);
   const t = TRANSLATIONS[currentLanguage] || TRANSLATIONS.en;
   const todayFormatted = formatDisplayDate(undefined, currentLanguage);
   const logoSrc = settings.logoUrl || '/logo.png';
+  const currentScale = settings.fontSizeScale !== undefined ? settings.fontSizeScale : 1.0;
+
+  const handleIncreaseScale = () => {
+    // Stepping up: 1.0 -> 1.15 -> 1.30 -> 1.45 -> 1.0
+    let nextScale: number;
+    if (currentScale >= 1.4) {
+      nextScale = 1.0;
+    } else {
+      nextScale = Number((currentScale + 0.15).toFixed(2));
+    }
+    if (onFontSizeChange) {
+      onFontSizeChange(nextScale);
+    }
+    setFontToast(`${Math.round(nextScale * 100)}%`);
+    setTimeout(() => setFontToast(null), 1800);
+  };
+
+  const handleDecreaseScale = () => {
+    const nextScale = Math.max(0.85, Number((currentScale - 0.15).toFixed(2)));
+    if (onFontSizeChange) {
+      onFontSizeChange(nextScale);
+    }
+    setFontToast(`${Math.round(nextScale * 100)}%`);
+    setTimeout(() => setFontToast(null), 1800);
+  };
 
   return (
-    <header className="bg-emerald-800 text-white rounded-b-3xl shadow-lg px-4 pt-3 pb-4 sticky top-0 z-30 transition-all">
+    <header className="bg-emerald-800 text-white rounded-b-3xl shadow-lg px-4 pt-3 pb-4 sticky top-0 z-30 transition-all relative">
+      {/* Quick Font Size Toast */}
+      {fontToast && (
+        <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 z-50 bg-emerald-950 text-white border border-emerald-500/80 px-3 py-1 rounded-full text-xs font-black shadow-xl animate-in fade-in zoom-in-95 flex items-center gap-1.5 pointer-events-none">
+          <span>{currentLanguage === 'ta' ? 'எழுத்து அளவு:' : 'Text Size:'}</span>
+          <span className="text-emerald-300 font-black">{fontToast}</span>
+        </div>
+      )}
+
       <div className="flex items-center justify-between gap-2">
         {/* Company Name & Chicken Mascot Logo */}
         <div className="flex items-center gap-2.5 min-w-0">
@@ -51,8 +87,34 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
         </div>
 
-        {/* Action Controls: Install App & Language Selector */}
+        {/* Action Controls: Text Size Button, Install App & Language Selector */}
         <div className="relative shrink-0 flex items-center gap-1.5">
+          {/* Quick Font Size Increase Button (Full App Accessibility) */}
+          <div className="flex items-center bg-emerald-950/70 p-0.5 rounded-full border border-emerald-600/60 shadow-xs shrink-0">
+            <button
+              type="button"
+              onClick={handleDecreaseScale}
+              disabled={currentScale <= 0.85}
+              title={t.decreaseTextSize || 'Decrease text size'}
+              aria-label="Decrease text size"
+              className="w-6 h-6 flex items-center justify-center rounded-full text-emerald-200 hover:text-white hover:bg-emerald-800 disabled:opacity-30 transition-all font-black text-xs"
+            >
+              A-
+            </button>
+            <button
+              type="button"
+              onClick={handleIncreaseScale}
+              title={t.increaseTextSize || 'Increase text size'}
+              aria-label="Increase text size for full app"
+              className="h-6 px-2 flex items-center justify-center gap-1 rounded-full bg-emerald-700 hover:bg-emerald-600 text-white shadow font-black text-xs transition-all active:scale-95"
+            >
+              <span>A+</span>
+              <span className="text-[10px] opacity-85 font-bold">
+                {Math.round(currentScale * 100)}%
+              </span>
+            </button>
+          </div>
+
           {/* Quick Install PWA Button */}
           {onInstallClick && (
             <button

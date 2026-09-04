@@ -2,18 +2,6 @@ import { Product, DailyPriceMap, ShopSettings, Bill, Language } from '../types';
 
 export const DEFAULT_PRODUCTS: Product[] = [
   { id: 'p0', name: 'Chicken', nameEn: 'Chicken', nameTa: 'கோழி இறைச்சி', defaultPrice: 220 },
-  { id: 'p1', name: 'Curry Cut', nameEn: 'Curry Cut', nameTa: 'குழம்பு வெட்டு', defaultPrice: 220 },
-  { id: 'p2', name: 'Biriyani piece', nameEn: 'Biriyani piece', nameTa: 'பிரியாணி துண்டு', defaultPrice: 220 },
-  { id: 'p3', name: '65 piece', nameEn: '65 piece', nameTa: '65 பீஸ்', defaultPrice: 240 },
-  { id: 'p4', name: 'Boneless', nameEn: 'Boneless', nameTa: 'எலும்பில்லாதது', defaultPrice: 280 },
-  { id: 'p5', name: 'Wings', nameEn: 'Wings', nameTa: 'இறக்கை', defaultPrice: 210 },
-  { id: 'p6', name: 'Lever', nameEn: 'Lever', nameTa: 'ஈரல்', defaultPrice: 180 },
-  { id: 'p7', name: 'Leg boneless', nameEn: 'Leg boneless', nameTa: 'லெக் போன்லெஸ்', defaultPrice: 300 },
-  { id: 'p8', name: 'Leg Skinless chicken', nameEn: 'Leg Skinless chicken', nameTa: 'லெக் ஸ்கின்லெஸ்', defaultPrice: 260 },
-  { id: 'p9', name: 'Skin chicken', nameEn: 'Skin chicken', nameTa: 'தோல் கோழி', defaultPrice: 190 },
-  { id: 'p10', name: 'Bone', nameEn: 'Bone', nameTa: 'எலும்பு', defaultPrice: 120 },
-  { id: 'p11', name: 'Grave piece', nameEn: 'Grave piece', nameTa: 'கிரேவி பீஸ்', defaultPrice: 230 },
-  { id: 'p12', name: 'Fry piece', nameEn: 'Fry piece', nameTa: 'வறுவல் பீஸ்', defaultPrice: 250 },
 ];
 
 export const DEFAULT_SETTINGS: ShopSettings = {
@@ -109,15 +97,19 @@ export function loadProducts(): Product[] {
             nameTa: p.nameTa || defaultTa || 'கோழி வகை',
           };
         });
-        // Ensure 'Chicken' is at index 0 (main cut)
-        const chickenIdx = hydrated.findIndex(
+        // Filter out all cuts except Chicken (and any newly created custom products)
+        const onlyChickenList = hydrated.filter((p) => {
+          const isChicken = p.id === 'p0' || (p.nameEn || p.name || '').trim().toLowerCase() === 'chicken';
+          const isOldDefaultCut = /^p(1[0-2]|[1-9])$/.test(p.id);
+          return isChicken && !isOldDefaultCut;
+        });
+
+        // Ensure 'Chicken' is present
+        const chickenIdx = onlyChickenList.findIndex(
           (p) => (p.nameEn || p.name || '').trim().toLowerCase() === 'chicken'
         );
-        if (chickenIdx > 0) {
-          const [chicken] = hydrated.splice(chickenIdx, 1);
-          hydrated.unshift(chicken);
-        } else if (chickenIdx === -1) {
-          hydrated.unshift({
+        if (chickenIdx === -1) {
+          onlyChickenList.unshift({
             id: 'p0',
             name: 'Chicken',
             nameEn: 'Chicken',
@@ -125,8 +117,8 @@ export function loadProducts(): Product[] {
             defaultPrice: 220,
           });
         }
-        saveProducts(hydrated);
-        return hydrated;
+        saveProducts(onlyChickenList);
+        return onlyChickenList;
       }
     }
   } catch (e) {

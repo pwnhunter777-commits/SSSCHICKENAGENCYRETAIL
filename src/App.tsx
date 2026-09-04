@@ -12,6 +12,7 @@ import {
   saveLanguage,
   isPriceSetForToday,
   applyFontScale,
+  saveShopSettings,
 } from './utils/storage';
 import { Header } from './components/Header';
 import { BottomNav } from './components/BottomNav';
@@ -43,7 +44,23 @@ export default function App() {
     const loadedSettings = loadShopSettings();
     const loadedLang = loadLanguage();
 
-    setProducts(loadedProds);
+    // Ensure only Chicken (and any user-created custom products) exist
+    const onlyChicken = loadedProds.filter((p) => {
+      const isChicken = p.id === 'p0' || (p.nameEn || p.name || '').trim().toLowerCase() === 'chicken';
+      const isOldDefaultCut = /^p(1[0-2]|[1-9])$/.test(p.id);
+      return isChicken && !isOldDefaultCut;
+    });
+    if (onlyChicken.length === 0) {
+      onlyChicken.push({
+        id: 'p0',
+        name: 'Chicken',
+        nameEn: 'Chicken',
+        nameTa: 'கோழி இறைச்சி',
+        defaultPrice: 220,
+      });
+    }
+
+    setProducts(onlyChicken);
     setSettings(loadedSettings);
     setLanguage(loadedLang);
 
@@ -63,6 +80,14 @@ export default function App() {
       applyFontScale(settings.fontSizeScale);
     }
   }, [settings?.fontSizeScale]);
+
+  const handleFontSizeChange = (newScale: number) => {
+    const clamped = Math.min(1.5, Math.max(0.85, Number(newScale.toFixed(2))));
+    applyFontScale(clamped);
+    const updated = { ...settings, fontSizeScale: clamped };
+    setSettings(updated);
+    saveShopSettings(updated);
+  };
 
   const handleLanguageChange = (newLang: Language) => {
     setLanguage(newLang);
@@ -91,6 +116,7 @@ export default function App() {
           currentLanguage={language}
           onLanguageChange={handleLanguageChange}
           onInstallClick={() => setShowInstallModal(true)}
+          onFontSizeChange={handleFontSizeChange}
         />
 
         {/* Main Body - Exactly 5 Pages */}
